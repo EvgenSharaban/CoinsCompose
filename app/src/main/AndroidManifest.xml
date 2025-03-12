@@ -13,7 +13,7 @@
         android:theme="@style/Theme.CoinsComp"
         tools:targetApi="31">
         <activity
-            android:name=".ui.presentation.coins.MainActivity"
+            android:name=".presentation.coins.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.CoinsComp">
             <intent-filter>
@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.presentation.summary.SummaryActivity" />
+        <activity android:name=".presentation.summary.SummaryActivity" />
     </application>
 
 </manifest>
