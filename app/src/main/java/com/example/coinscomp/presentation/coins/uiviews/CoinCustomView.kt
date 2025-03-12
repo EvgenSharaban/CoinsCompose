@@ -1,6 +1,5 @@
-package com.example.coinscomp.presentation.coins
+package com.example.coinscomp.presentation.coins.uiviews
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -23,18 +21,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil3.compose.AsyncImage
 import com.example.coinscomp.R
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @Composable
-fun CustomCard(
+fun CoinCustomView(
     rank: String,
     name: String,
     price: String,
     description: String,
     creationDate: String,
     shortName: String,
-    logoPainter: Painter,
+    logo: String?,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
@@ -115,8 +114,9 @@ fun CustomCard(
                             top.linkTo(nameRef.bottom, margin = 8.dp)
                         }
                 ) {
-                    Image(
-                        painter = logoPainter,
+                    AsyncImage(
+                        model = logo,
+                        placeholder = painterResource(R.drawable.case_detail_sample),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.size(56.dp)
@@ -173,14 +173,14 @@ fun CustomCard(
 @Composable
 private fun CustomCardPreview() {
     CoinsCompTheme {
-        CustomCard(
+        CoinCustomView(
             rank = "5",
             name = "Bitcoin ",
             price = "Price: 933532.32 USD",
             description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
             creationDate = "Since 2009.12.12",
             shortName = "BTC",
-            logoPainter = painterResource(R.drawable.case_detail_sample),
+            logo = null,
         )
     }
 }

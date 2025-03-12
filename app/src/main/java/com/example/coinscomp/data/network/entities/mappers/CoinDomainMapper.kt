@@ -3,7 +3,7 @@ package com.example.coinscomp.data.network.entities.mappers
 import com.example.coinscomp.data.network.entities.CoinEntity
 import com.example.coinscomp.domain.models.CoinDomain
 
-object CoinsMapper : FromEntityToDomainMapper<CoinEntity, CoinDomain> {
+object CoinDomainMapper : FromEntityToDomainMapper<CoinEntity, CoinDomain> {
 
     override fun mapToDomain(entity: CoinEntity?): CoinDomain {
         return CoinDomain(

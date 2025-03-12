@@ -1,10 +1,12 @@
 package com.example.coinscomp.domain.repositories
 
+import com.example.coinscomp.data.local.room.entities.CoinRoomEntity
 import com.example.coinscomp.domain.models.CoinDomain
+import kotlinx.coroutines.flow.Flow
 
 interface CoinsRepository {
 
-//    val coins: Flow<List<CoinRoomEntity>>
+    val coins: Flow<List<CoinRoomEntity>>
 
     suspend fun fetchCoinsFullEntity(): Result<Unit>
 

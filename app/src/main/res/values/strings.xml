@@ -9,4 +9,7 @@
     <string name="total_notes_count">Total notes count: %1$s</string>
     <string name="the_day_on_which_the_most_notes_were_taken">The day on which the most notes were taken: %1$s</string>
     <string name="member_for_days">Member for %1$s days</string>
+
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="unknown_error">Something went wrong</string>
 </resources>

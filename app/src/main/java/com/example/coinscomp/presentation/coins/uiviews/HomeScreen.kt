@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.coins
+package com.example.coinscomp.presentation.coins.uiviews
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -26,11 +27,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.coinscomp.presentation.bottomNavigationItemsList
+import com.example.coinscomp.presentation.coins.models.ModelCoinsCustomView
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    coins: List<ModelCoinsCustomView>
+) {
     var selectedItemIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
@@ -42,17 +47,29 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 .fillMaxSize()
 
         ) {
-            Box(Modifier
-                .weight(1f)
-                .fillMaxWidth()) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
                 LazyColumn {
-
+                    items(items = coins) { coin ->
+                        CoinCustomView(
+                            rank = coin.rank.toString(),
+                            name = coin.name,
+                            price = coin.price.toString(),
+                            description = coin.description,
+                            creationDate = coin.creationDate,
+                            shortName = coin.shortName,
+                            logo = coin.logo,
+                        )
+                    }
                 }
                 FloatingActionButton(
                     onClick = { },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(16.dp),
+                        .padding(bottom = 16.dp, end = 32.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -106,6 +123,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 @Composable
 private fun HomeScreenPreview() {
     CoinsCompTheme {
-        HomeScreen()
+        HomeScreen(coins = emptyList())
     }
 }
