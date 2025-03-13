@@ -35,7 +35,7 @@ fun RhombusTextView(
     modifier: Modifier = Modifier,
     backColor: Color = Color.Red,
     cornerRadius: Float = 0f,
-    textColor: Color = Color.White,
+    textColor: Color = Color.DarkGray,
     textSize: TextUnit = 16.sp
 ) {
     AndroidView(

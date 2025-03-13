@@ -14,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -39,7 +41,7 @@ fun CoinCustomView(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
     ) {
         val (rankRef, containerRef) = createRefs()
 
@@ -81,6 +83,7 @@ fun CoinCustomView(
                 Text(
                     text = name,
                     fontSize = 30.sp,
+                    lineHeight = 1.2.em,
                     modifier = Modifier
                         .constrainAs(nameRef) {
                             start.linkTo(parent.start)
@@ -91,7 +94,7 @@ fun CoinCustomView(
                 )
 
                 Text(
-                    text = price,
+                    text = stringResource(R.string.price_for_coin, price),
                     fontSize = 18.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -108,9 +111,9 @@ fun CoinCustomView(
                     shape = CircleShape,
                     elevation = CardDefaults.cardElevation(0.dp),
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(56.dp)
                         .constrainAs(logoRef) {
-                            start.linkTo(parent.start, margin = 28.dp)
+                            start.linkTo(parent.start, margin = 20.dp)
                             end.linkTo(descriptionRef.start)
                             top.linkTo(nameRef.bottom, margin = 8.dp)
                         }
@@ -132,7 +135,7 @@ fun CoinCustomView(
                             start.linkTo(logoRef.end, margin = 16.dp)
                             top.linkTo(priceRef.bottom, margin = 8.dp)
                             bottom.linkTo(shortNameRef.top, margin = 8.dp)
-                            end.linkTo(parent.end, margin = 16.dp)
+                            end.linkTo(parent.end)
                             width = Dimension.fillToConstraints
                         }
                 )
@@ -175,7 +178,7 @@ private fun CustomCardPreview() {
     CoinsCompTheme {
         CoinCustomView(
             rank = "5",
-            name = "Bitcoin ",
+            name = "Bitcoin Fake",
             price = "Price: 933532.32 USD",
             description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
             creationDate = "Since 2009.12.12",

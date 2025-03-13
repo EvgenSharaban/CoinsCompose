@@ -10,8 +10,14 @@
     <string name="the_day_on_which_the_most_notes_were_taken">The day on which the most notes were taken: %1$s</string>
     <string name="member_for_days">Member for %1$s days</string>
 
+    <string name="price_for_coin">Price: %1$s USD</string>
+
     <string name="add_note">Add note</string>
     <string name="enter_note">Enter note</string>
+    <string name="no_data">No data to display</string>
+    <string name="are_you_sure_you_want_delete_item">Are you sure you want to delete this note?</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
 
     <string name="no_internet_connection">No internet connection</string>
     <string name="unknown_error">Something went wrong</string>

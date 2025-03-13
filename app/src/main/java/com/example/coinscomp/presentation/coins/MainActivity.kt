@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.coinscomp.presentation.coins.models.notes.NoteUiModelMapper.mapToRoomModel
 import com.example.coinscomp.presentation.uiviews.HomeScreen
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,9 +25,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val loading by viewModel.isLoading.collectAsStateWithLifecycle()
             val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
             val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
-            val scrollingListPosition = remember { mutableIntStateOf(0) }
+            val scrollingListPosition = remember { mutableIntStateOf(-1) }
 
             when (event) {
                 is EventsCoins.MessageForUser -> {
@@ -44,10 +46,14 @@ class MainActivity : ComponentActivity() {
 
             CoinsCompTheme {
                 HomeScreen(
-                    items = itemsList,
+                    itemsList = itemsList,
+                    loading = loading,
                     positionToScrolling = scrollingListPosition.intValue,
                     onNoteAdded = { enteredNote ->
                         viewModel.addNote(enteredNote)
+                    },
+                    onNoteDeleted = { note ->
+                        viewModel.deleteNote(note.mapToRoomModel())
                     }
                 )
 
