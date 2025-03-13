@@ -60,6 +60,16 @@ class MainActivityViewModel @Inject constructor(
         observeData()
     }
 
+    private fun setHiddenCoinsToStorage(id: String) {
+        viewModelScope.launch {
+            coinsRepository.hideCoin(id)
+        }
+    }
+
+    fun onItemCoinLongClicked(item: ModelCoinsCustomView) {
+        setHiddenCoinsToStorage(item.id)
+    }
+
     fun addNote(noteText: String) {
         viewModelScope.launch {
             setLoading(true)
@@ -73,7 +83,7 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun deleteNote(note: NoteRoomEntity) {
+    fun onItemNoteLongClicked(note: NoteRoomEntity) {
         viewModelScope.launch {
             setLoading(true)
             notesRepository.deleteNote(note)

@@ -46,8 +46,8 @@ class CoinsRepositoryFake @Inject constructor(
         )
     }
 
-    override val coins: Flow<List<CoinRoomEntity>> = combine(allCoins, hiddenCoins) { allCoins, hiddenCoins ->
-        allCoins.filter { !hiddenCoins.contains(it.id) }
+    override val coins: Flow<List<CoinRoomEntity>> = combine(allCoins, hiddenCoins) { allCoins, hiddenCoinsIds ->
+        allCoins.filter { !hiddenCoinsIds.contains(it.id) }
     }
 
     override suspend fun fetchCoinsFullEntity(): Result<Unit> {

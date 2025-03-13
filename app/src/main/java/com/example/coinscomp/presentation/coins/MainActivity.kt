@@ -52,8 +52,11 @@ class MainActivity : ComponentActivity() {
                     onNoteAdded = { enteredNote ->
                         viewModel.addNote(enteredNote)
                     },
-                    onNoteDeleted = { note ->
-                        viewModel.deleteNote(note.mapToRoomModel())
+                    onNoteLongClicked = { note ->
+                        viewModel.onItemNoteLongClicked(note.mapToRoomModel())
+                    },
+                    onCoinLongClicked = { coin ->
+                        viewModel.onItemCoinLongClicked(coin)
                     }
                 )
 

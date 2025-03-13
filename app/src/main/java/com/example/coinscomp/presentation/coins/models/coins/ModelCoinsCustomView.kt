@@ -10,5 +10,8 @@ data class ModelCoinsCustomView(
     val shortName: String,
     val type: String,
     val isActive: Boolean,
-    val price: Double
+    val price: Double,
+
+    val isExpanded: Boolean = false,
+    val isHided: Boolean = false
 )

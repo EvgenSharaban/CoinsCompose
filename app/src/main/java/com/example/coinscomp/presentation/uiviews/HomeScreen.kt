@@ -1,5 +1,6 @@
 package com.example.coinscomp.presentation.uiviews
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.coinscomp.R
+import com.example.coinscomp.core.other.TAG
 import com.example.coinscomp.presentation.bottomNavigationItemsList
 import com.example.coinscomp.presentation.coins.CustomViewListItems
+import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
@@ -49,15 +53,20 @@ fun HomeScreen(
     positionToScrolling: Int,
     loading: Boolean = false,
     onNoteAdded: (String) -> Unit,
-    onNoteDeleted: (ModelNotesCustomView) -> Unit
+    onNoteLongClicked: (ModelNotesCustomView) -> Unit,
+    onCoinLongClicked: (ModelCoinsCustomView) -> Unit
 ) {
     var selectedNavItemIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
 
     val listState = rememberLazyListState()
+    val visibleItemsCount by remember {
+        derivedStateOf { listState.layoutInfo.visibleItemsInfo.size }
+    }
     LaunchedEffect(positionToScrolling) {
-        if (positionToScrolling in itemsList.indices) {
+        Log.d(TAG, "HomeScreen: position to scrolling = $positionToScrolling, visibleItemsCount = $visibleItemsCount")
+        if (positionToScrolling in itemsList.indices && positionToScrolling >= visibleItemsCount) {
             listState.scrollToItem(positionToScrolling)
         }
     }
@@ -75,6 +84,7 @@ fun HomeScreen(
             ) {
                 var openAddNoteDialog by remember { mutableStateOf(false) }
                 val openDeleteNoteDialog = remember { mutableStateOf<ModelNotesCustomView?>(null) }
+                val openHideCoinDialog = remember { mutableStateOf<ModelCoinsCustomView?>(null) }
 
                 if (itemsList.isEmpty()) {
                     if (!loading) {
@@ -85,7 +95,10 @@ fun HomeScreen(
                     }
                 } else {
                     LazyColumn(state = listState) {
-                        items(itemsList) { item ->
+                        items(
+                            items = itemsList,
+                            key = { it.hashCode() } // need for animations
+                        ) { item ->
                             when (item) {
                                 is CustomViewListItems.CoinItem -> CoinCustomView(
                                     rank = item.coin.rank.toString(),
@@ -95,22 +108,26 @@ fun HomeScreen(
                                     creationDate = item.coin.creationDate,
                                     shortName = item.coin.shortName,
                                     logo = item.coin.logo,
-                                    modifier = Modifier.combinedClickable(
-                                        onClick = { },
-                                        onLongClick = {
-
-                                        }
-                                    )
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { },
+                                            onLongClick = {
+                                                openHideCoinDialog.value = item.coin
+                                            }
+                                        )
+                                        .animateItem()
                                 )
 
                                 is CustomViewListItems.NoteItem -> NoteCustomView(
                                     note = item.note.note,
-                                    modifier = Modifier.combinedClickable(
-                                        onClick = { },
-                                        onLongClick = {
-                                            openDeleteNoteDialog.value = item.note
-                                        }
-                                    )
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = { },
+                                            onLongClick = {
+                                                openDeleteNoteDialog.value = item.note
+                                            }
+                                        )
+                                        .animateItem()
                                 )
                             }
                         }
@@ -156,8 +173,20 @@ fun HomeScreen(
                             openDeleteNoteDialog.value = null
                         },
                         onConfirmation = {
-                            onNoteDeleted(openDeleteNoteDialog.value!!)
+                            onNoteLongClicked(openDeleteNoteDialog.value!!)
                             openDeleteNoteDialog.value = null
+                        }
+                    )
+                }
+
+                if (openHideCoinDialog.value != null) {
+                    AlertDialogHideCoin(
+                        onDismiss = {
+                            openHideCoinDialog.value = null
+                        },
+                        onConfirmation = {
+                            onCoinLongClicked(openHideCoinDialog.value!!)
+                            openHideCoinDialog.value = null
                         }
                     )
                 }
@@ -165,9 +194,9 @@ fun HomeScreen(
             NavigationBar(Modifier.fillMaxWidth()) {
                 bottomNavigationItemsList.forEachIndexed { index, item ->
                     NavigationBarItem(
-                        label = {
-                            Text(text = stringResource(item.titleRes))
-                        },
+//                        label = {
+//                            Text(text = stringResource(item.titleRes))
+//                        },
                         selected = selectedNavItemIndex == index,
                         onClick = {
                             if (selectedNavItemIndex != index) {
@@ -213,7 +242,8 @@ private fun HomeScreenPreview() {
             loading = false,
             positionToScrolling = 0,
             onNoteAdded = {},
-            onNoteDeleted = {}
+            onNoteLongClicked = {},
+            onCoinLongClicked = {}
         )
     }
 }
