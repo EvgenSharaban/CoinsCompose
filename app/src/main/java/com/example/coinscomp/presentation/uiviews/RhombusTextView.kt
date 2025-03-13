@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.coins.uiviews
+package com.example.coinscomp.presentation.uiviews
 
 import android.util.TypedValue
 import androidx.compose.foundation.layout.Box

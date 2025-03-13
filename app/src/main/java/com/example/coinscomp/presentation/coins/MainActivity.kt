@@ -6,8 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.coinscomp.presentation.coins.uiviews.HomeScreen
+import com.example.coinscomp.presentation.uiviews.HomeScreen
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,11 +24,35 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val coinsList by viewModel.coinsList.collectAsStateWithLifecycle()
+            val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
+            val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
+            val scrollingListPosition = remember { mutableIntStateOf(0) }
+
+            when (event) {
+                is EventsCoins.MessageForUser -> {
+                    val message = (event as EventsCoins.MessageForUser).message
+
+                }
+
+                is EventsCoins.PositionToScrolling -> {
+                    val position = (event as EventsCoins.PositionToScrolling).position
+                    scrollingListPosition.intValue = position
+                }
+
+                is EventsCoins.None -> {}
+            }
 
             CoinsCompTheme {
+                HomeScreen(
+                    items = itemsList,
+                    positionToScrolling = scrollingListPosition.intValue,
+                    onNoteAdded = { enteredNote ->
+                        viewModel.addNote(enteredNote)
+                    }
+                )
+
 //                TrainingAppScreen()
-                HomeScreen(coins = coinsList)
+
 //                CustomCard(
 //                    rank = "5",
 //                    name = "Bitcoin Bitcoin",

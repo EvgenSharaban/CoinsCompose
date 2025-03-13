@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.coins.models
+package com.example.coinscomp.presentation.coins.models.coins
 
 data class ModelCoinsCustomView(
     val id: String,

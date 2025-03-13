@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.coins.uiviews
+package com.example.coinscomp.presentation.uiviews
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,6 +45,7 @@ fun CoinCustomView(
 
         RhombusTextView(
             text = rank,
+            textSize = 24.sp,
             backColor = Color(0xFFFFA500), // remove static color
             cornerRadius = 16f,
             modifier = Modifier
@@ -107,7 +108,7 @@ fun CoinCustomView(
                     shape = CircleShape,
                     elevation = CardDefaults.cardElevation(0.dp),
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(64.dp)
                         .constrainAs(logoRef) {
                             start.linkTo(parent.start, margin = 28.dp)
                             end.linkTo(descriptionRef.start)
@@ -118,8 +119,7 @@ fun CoinCustomView(
                         model = logo,
                         placeholder = painterResource(R.drawable.case_detail_sample),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(56.dp)
+                        contentScale = ContentScale.Crop
                     )
                 }
 
