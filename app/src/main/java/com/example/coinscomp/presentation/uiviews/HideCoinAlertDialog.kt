@@ -10,7 +10,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.coinscomp.R
 
 @Composable
-fun AlertDialogHideCoin(
+fun HideCoinAlertDialog(
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     modifier: Modifier = Modifier

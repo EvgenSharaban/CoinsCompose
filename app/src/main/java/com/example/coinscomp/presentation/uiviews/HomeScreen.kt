@@ -213,7 +213,7 @@ fun HomeScreen(
                 }
 
                 if (openAddNoteDialog) {
-                    AlertDialogAddNote(
+                    AddNoteAlertDialog(
                         onDismiss = { openAddNoteDialog = false },
                         onConfirmation = { enteredText ->
                             openAddNoteDialog = false
@@ -223,7 +223,7 @@ fun HomeScreen(
                 }
 
                 if (openDeleteNoteDialog.value != null) {
-                    AlertDialogDeleteNote(
+                    DeleteNoteAlertDialog(
                         onDismiss = {
                             openDeleteNoteDialog.value = null
                         },
@@ -235,7 +235,7 @@ fun HomeScreen(
                 }
 
                 if (openHideCoinDialog.value != null) {
-                    AlertDialogHideCoin(
+                    HideCoinAlertDialog(
                         onDismiss = {
                             openHideCoinDialog.value = null
                         },
