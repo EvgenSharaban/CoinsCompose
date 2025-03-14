@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.coinscomp.core.other.DEFAULT_SCROLLING_POSITION
@@ -30,11 +31,12 @@ class MainActivity : ComponentActivity() {
             val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
             val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
             val scrollingListPosition = remember { mutableIntStateOf(DEFAULT_SCROLLING_POSITION) }
+            val errorMessage = remember { mutableStateOf<String?>(null) }
 
             when (event) {
                 is EventsCoins.MessageForUser -> {
                     val message = (event as EventsCoins.MessageForUser).message
-
+                    errorMessage.value = message
                 }
 
                 is EventsCoins.PositionToScrolling -> {
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
                     itemsList = itemsList,
                     loading = loading,
                     positionToScrolling = scrollingListPosition.intValue,
+                    errorMessage = errorMessage.value,
                     onNoteAdded = { enteredNote ->
                         viewModel.addNote(enteredNote)
                     },

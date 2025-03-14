@@ -23,6 +23,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +49,7 @@ import com.example.coinscomp.presentation.coins.CustomViewListItems
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.ui.theme.CoinsCompTheme
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -53,6 +58,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     itemsList: List<CustomViewListItems>,
     positionToScrolling: Int,
+    errorMessage: String?,
     loading: Boolean = false,
     onNoteAdded: (String) -> Unit,
     onNoteLongClicked: (ModelNotesCustomView) -> Unit,
@@ -61,6 +67,21 @@ fun HomeScreen(
 ) {
     var selectedNavItemIndex by rememberSaveable {
         mutableIntStateOf(0)
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val okText = stringResource(android.R.string.ok)
+    LaunchedEffect(errorMessage) {
+        if (!errorMessage.isNullOrBlank()) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    actionLabel = okText,
+                    duration = SnackbarDuration.Indefinite,
+                )
+            }
+        }
     }
 
     val listState = rememberLazyListState()
@@ -75,7 +96,16 @@ fun HomeScreen(
         }
     }
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    CustomSnackbar(data)
+                }
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = modifier
                 .padding(top = innerPadding.calculateTopPadding())
@@ -258,6 +288,7 @@ private fun HomeScreenPreview() {
             itemsList = emptyList(),
             loading = false,
             positionToScrolling = 0,
+            errorMessage = null,
             onNoteAdded = {},
             onNoteLongClicked = {},
             onCoinLongClicked = {},
