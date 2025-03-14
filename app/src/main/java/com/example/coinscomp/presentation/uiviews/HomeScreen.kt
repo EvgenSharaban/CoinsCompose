@@ -1,6 +1,10 @@
 package com.example.coinscomp.presentation.uiviews
 
+import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,11 +38,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,8 +52,8 @@ import com.example.coinscomp.presentation.bottomNavigationItemsList
 import com.example.coinscomp.presentation.coins.CustomViewListItems
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
+import com.example.coinscomp.presentation.summary.SummaryActivity
 import com.example.coinscomp.ui.theme.CoinsCompTheme
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -68,32 +72,36 @@ fun HomeScreen(
     var selectedNavItemIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
+    val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
     val okText = stringResource(android.R.string.ok)
+
+    val listState = rememberLazyListState()
+    val lastVisibleIndex by remember {
+        // derivedStateOf tracks changes and recalculates lastVisibleIndex only when necessary, which optimizes performance.
+        derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
+    }
+
     LaunchedEffect(errorMessage) {
         if (!errorMessage.isNullOrBlank()) {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar(
-                    message = errorMessage,
-                    actionLabel = okText,
-                    duration = SnackbarDuration.Indefinite,
-                )
-            }
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                actionLabel = okText,
+                duration = SnackbarDuration.Indefinite,
+            )
         }
     }
 
-    val listState = rememberLazyListState()
-    // derivedStateOf tracks changes and recalculates lastVisibleIndex only when necessary, which optimizes performance.
-    val lastVisibleIndex by remember {
-        derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
-    }
     LaunchedEffect(positionToScrolling) {
         Log.d(TAG, "HomeScreen: lase visible index = $lastVisibleIndex")
         if (positionToScrolling in itemsList.indices && positionToScrolling !in listState.firstVisibleItemIndex..lastVisibleIndex) {
             listState.scrollToItem(positionToScrolling)
         }
+    }
+
+    BackHandler {
+        (context as? Activity)?.finishAffinity()
     }
 
     Scaffold(
@@ -241,28 +249,18 @@ fun HomeScreen(
             NavigationBar(Modifier.fillMaxWidth()) {
                 bottomNavigationItemsList.forEachIndexed { index, item ->
                     NavigationBarItem(
-//                        label = {
-//                            Text(text = stringResource(item.titleRes))
-//                        },
                         selected = selectedNavItemIndex == index,
                         onClick = {
                             if (selectedNavItemIndex != index) {
                                 selectedNavItemIndex = index
-                                // navController.navigate(item.title)
+                                if (item.idRes == R.id.nav_summary) {
+                                    val intent = Intent(context, SummaryActivity::class.java)
+                                    val resetDefaultAnimation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
+                                    context.startActivity(intent, resetDefaultAnimation)
+                                }
                             }
                         },
                         icon = {
-//                            BadgedBox(
-//                                badge = {
-//                                    if (item.badgeCount != null) {
-//                                        Badge {
-//                                            Text(text = item.badgeCount.toString())
-//                                        }
-//                                    } else if (item.hasNews) {
-//                                        Badge()
-//                                    }
-//                                }
-//                            ) {
                             Icon(
                                 imageVector = if (index == selectedNavItemIndex) {
                                     item.selectedIcon
@@ -271,7 +269,6 @@ fun HomeScreen(
                                 },
                                 contentDescription = stringResource(item.titleRes)
                             )
-//                            }
                         }
                     )
                 }

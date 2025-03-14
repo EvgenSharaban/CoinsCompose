@@ -9,8 +9,13 @@ import com.example.coinscomp.data.local.room.CoinsDao
 import com.example.coinscomp.data.local.room.CoinsDataBase
 import com.example.coinscomp.data.local.room.entities.CoinDataBaseMapper.mapToLocalEntityList
 import com.example.coinscomp.data.local.room.entities.CoinRoomEntity
+import com.example.coinscomp.data.repositories.CoinsRepositoryConst.FILTERING_TYPE
 import com.example.coinscomp.domain.models.CoinDomain
 import com.example.coinscomp.domain.repositories.CoinsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -46,28 +51,28 @@ class CoinsRepositoryFake @Inject constructor(
     }
 
     override suspend fun fetchCoinsFullEntity(): Result<Unit> {
-//        return Result.success(fakeCoins)
-//            .mapCatching { coins ->
-//                coroutineScope {
-//                    Log.d(TAG, "getCoins: time start")
-//                    val list = coins
-//                        .filter { it.rank > 0 && it.isActive && it.type == FILTERING_TYPE }
-//                        .sortedBy { it.rank }
-//                        .map { coin ->
-//                            async(Dispatchers.IO) {
-//                                getCoinById(coin.id).getOrNull()
-//                            }
-//                        }
-//                        .awaitAll()
-//                        .filterNotNull()
-//                    Log.d(TAG, "getCoins: time end")
-//                    list
-//                }
-//            }.onSuccess {
-//                insertCoinsToDB(it)
-//            }
-//            .map { } // need for Result<Unit>
-        return Result.failure(Exception("manually failed"))
+        return Result.success(fakeCoins)
+            .mapCatching { coins ->
+                coroutineScope {
+                    Log.d(TAG, "getCoins: time start")
+                    val list = coins
+                        .filter { it.rank > 0 && it.isActive && it.type == FILTERING_TYPE }
+                        .sortedBy { it.rank }
+                        .map { coin ->
+                            async(Dispatchers.IO) {
+                                getCoinById(coin.id).getOrNull()
+                            }
+                        }
+                        .awaitAll()
+                        .filterNotNull()
+                    Log.d(TAG, "getCoins: time end")
+                    list
+                }
+            }.onSuccess {
+                insertCoinsToDB(it)
+            }
+            .map { } // need for Result<Unit>
+//        return Result.failure(Exception("manually failed"))
     }
 
     override suspend fun getCoinById(id: String): Result<CoinDomain> {

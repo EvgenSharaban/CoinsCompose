@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
             val loading by viewModel.isLoading.collectAsStateWithLifecycle()
             val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
             val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
+
             val scrollingListPosition = remember { mutableIntStateOf(DEFAULT_SCROLLING_POSITION) }
             val errorMessage = remember { mutableStateOf<String?>(null) }
 
