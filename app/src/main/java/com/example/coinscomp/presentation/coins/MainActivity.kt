@@ -57,6 +57,9 @@ class MainActivity : ComponentActivity() {
                     },
                     onCoinLongClicked = { coin ->
                         viewModel.onItemCoinLongClicked(coin)
+                    },
+                    onCoinClicked = { coin ->
+                        viewModel.onItemCoinClicked(coin)
                     }
                 )
 

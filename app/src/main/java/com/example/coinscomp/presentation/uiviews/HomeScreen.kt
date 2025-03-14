@@ -54,7 +54,8 @@ fun HomeScreen(
     loading: Boolean = false,
     onNoteAdded: (String) -> Unit,
     onNoteLongClicked: (ModelNotesCustomView) -> Unit,
-    onCoinLongClicked: (ModelCoinsCustomView) -> Unit
+    onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
+    onCoinClicked: (ModelCoinsCustomView) -> Unit
 ) {
     var selectedNavItemIndex by rememberSaveable {
         mutableIntStateOf(0)
@@ -108,9 +109,12 @@ fun HomeScreen(
                                     creationDate = item.coin.creationDate,
                                     shortName = item.coin.shortName,
                                     logo = item.coin.logo,
+                                    isExpanded = item.coin.isExpanded,
                                     modifier = Modifier
                                         .combinedClickable(
-                                            onClick = { },
+                                            onClick = {
+                                                onCoinClicked(item.coin)
+                                            },
                                             onLongClick = {
                                                 openHideCoinDialog.value = item.coin
                                             }
@@ -243,7 +247,8 @@ private fun HomeScreenPreview() {
             positionToScrolling = 0,
             onNoteAdded = {},
             onNoteLongClicked = {},
-            onCoinLongClicked = {}
+            onCoinLongClicked = {},
+            onCoinClicked = {}
         )
     }
 }

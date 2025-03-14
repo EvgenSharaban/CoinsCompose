@@ -40,13 +40,28 @@ class MainActivityViewModel @Inject constructor(
 
     private val coinsList = MutableStateFlow<List<ModelCoinsCustomView>>(emptyList())
     private val notesList = MutableStateFlow<List<ModelNotesCustomView>>(emptyList())
+    private val expandedCoinItemsIds = MutableStateFlow<Set<String>>(emptySet())
 
-    val itemsList: StateFlow<List<CustomViewListItems>> = combine(coinsList, notesList) { coins, notes ->
+    val itemsList: StateFlow<List<CustomViewListItems>> = combine(coinsList, notesList, expandedCoinItemsIds) { coins, notes, expandedCoinItemsIds ->
         val notesItemsList = notes.map {
             CustomViewListItems.NoteItem(it)
         }
         val coinsItemsList = coins.map {
-            CustomViewListItems.CoinItem(it)
+            val coin = ModelCoinsCustomView(
+                id = it.id,
+                rank = it.rank,
+                name = it.name,
+                description = it.description,
+                creationDate = it.creationDate,
+                logo = it.logo,
+                shortName = it.shortName,
+                type = it.type,
+                isActive = it.isActive,
+                price = it.price,
+                isExpanded = it.id in expandedCoinItemsIds,
+                isHided = it.isHided
+            )
+            CustomViewListItems.CoinItem(coin)
         }
         notesItemsList.plus(coinsItemsList)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -60,9 +75,14 @@ class MainActivityViewModel @Inject constructor(
         observeData()
     }
 
-    private fun setHiddenCoinsToStorage(id: String) {
-        viewModelScope.launch {
-            coinsRepository.hideCoin(id)
+    fun onItemCoinClicked(item: ModelCoinsCustomView) {
+        Log.d(TAG, "onItemCoinClicked: clickedId = ${item.id}, expandedCoinItemsIds = ${expandedCoinItemsIds.value}")
+        expandedCoinItemsIds.update {
+            if (expandedCoinItemsIds.value.contains(item.id)) {
+                it.minus(item.id)
+            } else {
+                it.plus(item.id)
+            }
         }
     }
 
@@ -111,6 +131,12 @@ class MainActivityViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun setHiddenCoinsToStorage(id: String) {
+        viewModelScope.launch {
+            coinsRepository.hideCoin(id)
         }
     }
 

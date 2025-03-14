@@ -36,6 +36,7 @@ fun CoinCustomView(
     creationDate: String,
     shortName: String,
     logo: String?,
+    isExpanded: Boolean,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
@@ -114,8 +115,9 @@ fun CoinCustomView(
                         .size(56.dp)
                         .constrainAs(logoRef) {
                             start.linkTo(parent.start, margin = 20.dp)
-                            end.linkTo(descriptionRef.start)
+                            end.linkTo(parent.end)
                             top.linkTo(nameRef.bottom, margin = 8.dp)
+                            horizontalBias = 0f
                         }
                 ) {
                     AsyncImage(
@@ -126,19 +128,21 @@ fun CoinCustomView(
                     )
                 }
 
-                Text(
-                    text = description,
-                    textAlign = TextAlign.End,
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .constrainAs(descriptionRef) {
-                            start.linkTo(logoRef.end, margin = 16.dp)
-                            top.linkTo(priceRef.bottom, margin = 8.dp)
-                            bottom.linkTo(shortNameRef.top, margin = 8.dp)
-                            end.linkTo(parent.end)
-                            width = Dimension.fillToConstraints
-                        }
-                )
+                if (isExpanded) {
+                    Text(
+                        text = description,
+                        textAlign = TextAlign.End,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .constrainAs(descriptionRef) {
+                                start.linkTo(logoRef.end, margin = 16.dp)
+                                top.linkTo(priceRef.bottom, margin = 8.dp)
+                                bottom.linkTo(shortNameRef.top, margin = 8.dp)
+                                end.linkTo(parent.end)
+                                width = Dimension.fillToConstraints
+                            }
+                    )
+                }
 
                 Text(
                     text = creationDate,
@@ -179,11 +183,12 @@ private fun CustomCardPreview() {
         CoinCustomView(
             rank = "5",
             name = "Bitcoin Fake",
-            price = "Price: 933532.32 USD",
+            price = "933532.32",
             description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
             creationDate = "Since 2009.12.12",
             shortName = "BTC",
             logo = null,
+            isExpanded = false
         )
     }
 }
