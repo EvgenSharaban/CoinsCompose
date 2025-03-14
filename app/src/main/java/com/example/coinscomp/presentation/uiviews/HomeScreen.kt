@@ -1,6 +1,8 @@
 package com.example.coinscomp.presentation.uiviews
 
 import android.util.Log
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -62,12 +64,13 @@ fun HomeScreen(
     }
 
     val listState = rememberLazyListState()
-    val visibleItemsCount by remember {
-        derivedStateOf { listState.layoutInfo.visibleItemsInfo.size }
+    // derivedStateOf tracks changes and recalculates lastVisibleIndex only when necessary, which optimizes performance.
+    val lastVisibleIndex by remember {
+        derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
     }
     LaunchedEffect(positionToScrolling) {
-        Log.d(TAG, "HomeScreen: position to scrolling = $positionToScrolling, visibleItemsCount = $visibleItemsCount")
-        if (positionToScrolling in itemsList.indices && positionToScrolling >= visibleItemsCount) {
+        Log.d(TAG, "HomeScreen: lase visible index = $lastVisibleIndex")
+        if (positionToScrolling in itemsList.indices && positionToScrolling !in listState.firstVisibleItemIndex..lastVisibleIndex) {
             listState.scrollToItem(positionToScrolling)
         }
     }
@@ -110,16 +113,21 @@ fun HomeScreen(
                                     shortName = item.coin.shortName,
                                     logo = item.coin.logo,
                                     isExpanded = item.coin.isExpanded,
+                                    onCoinClicked = {
+                                        onCoinClicked(item.coin)
+                                    },
+                                    onCoinLongClicked = {
+                                        openHideCoinDialog.value = item.coin
+                                    },
                                     modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = {
-                                                onCoinClicked(item.coin)
-                                            },
-                                            onLongClick = {
-                                                openHideCoinDialog.value = item.coin
-                                            }
+                                        .animateItem(
+                                            fadeInSpec = null,
+                                            fadeOutSpec = null,
+                                            placementSpec = spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessLow
+                                            )
                                         )
-                                        .animateItem()
                                 )
 
                                 is CustomViewListItems.NoteItem -> NoteCustomView(
@@ -131,7 +139,12 @@ fun HomeScreen(
                                                 openDeleteNoteDialog.value = item.note
                                             }
                                         )
-                                        .animateItem()
+                                        .animateItem(
+                                            placementSpec = spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessLow
+                                            )
+                                        )
                                 )
                             }
                         }

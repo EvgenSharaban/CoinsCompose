@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.coinscomp.core.other.DEFAULT_SCROLLING_POSITION
 import com.example.coinscomp.presentation.coins.models.notes.NoteUiModelMapper.mapToRoomModel
 import com.example.coinscomp.presentation.uiviews.HomeScreen
 import com.example.coinscomp.ui.theme.CoinsCompTheme
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
             val loading by viewModel.isLoading.collectAsStateWithLifecycle()
             val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
             val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
-            val scrollingListPosition = remember { mutableIntStateOf(-1) }
+            val scrollingListPosition = remember { mutableIntStateOf(DEFAULT_SCROLLING_POSITION) }
 
             when (event) {
                 is EventsCoins.MessageForUser -> {
@@ -62,18 +63,8 @@ class MainActivity : ComponentActivity() {
                         viewModel.onItemCoinClicked(coin)
                     }
                 )
-
-//                TrainingAppScreen()
-
-//                CustomCard(
-//                    rank = "5",
-//                    name = "Bitcoin Bitcoin",
-//                    price = "Price: 933532.325345 USD",
-//                    description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
-//                    creationDate = "Since 2009.12.12",
-//                    shortName = "BTC",
-//                    logoPainter = painterResource(R.drawable.case_detail_sample),
-//                )
+                // need to scrolling after deleting and adding all notes
+                scrollingListPosition.intValue = DEFAULT_SCROLLING_POSITION
             }
         }
     }

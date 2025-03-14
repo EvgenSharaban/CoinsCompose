@@ -1,5 +1,7 @@
 package com.example.coinscomp.presentation.uiviews
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -10,6 +12,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -27,6 +33,7 @@ import coil3.compose.AsyncImage
 import com.example.coinscomp.R
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CoinCustomView(
     rank: String,
@@ -37,8 +44,12 @@ fun CoinCustomView(
     shortName: String,
     logo: String?,
     isExpanded: Boolean,
+    onCoinClicked: () -> Unit,
+    onCoinLongClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var localIsExpanded by remember { mutableStateOf(isExpanded) }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
@@ -77,6 +88,15 @@ fun CoinCustomView(
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = {
+                            localIsExpanded = !localIsExpanded
+                            onCoinClicked()
+                        },
+                        onLongClick = {
+                            onCoinLongClicked()
+                        }
+                    )
                     .padding(12.dp)
             ) {
                 val (nameRef, priceRef, logoRef, descriptionRef, dateRef, shortNameRef) = createRefs()
@@ -188,7 +208,9 @@ private fun CustomCardPreview() {
             creationDate = "Since 2009.12.12",
             shortName = "BTC",
             logo = null,
-            isExpanded = false
+            isExpanded = false,
+            onCoinClicked = {},
+            onCoinLongClicked = {}
         )
     }
 }
