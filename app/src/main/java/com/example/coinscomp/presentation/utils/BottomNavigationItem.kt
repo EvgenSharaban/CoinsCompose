@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation
+package com.example.coinscomp.presentation.utils
 
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes

@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.uiviews.views
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable

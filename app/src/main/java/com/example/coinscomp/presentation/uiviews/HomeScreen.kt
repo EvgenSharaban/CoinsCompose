@@ -2,6 +2,7 @@ package com.example.coinscomp.presentation.uiviews
 
 import android.app.Activity
 import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -24,8 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -35,10 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,13 +45,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.TAG
-import com.example.coinscomp.presentation.bottomNavigationItemsList
 import com.example.coinscomp.presentation.coins.CustomViewListItems
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.presentation.summary.SummaryActivity
+import com.example.coinscomp.presentation.uiviews.dialogs.AddNoteAlertDialog
+import com.example.coinscomp.presentation.uiviews.dialogs.DeleteNoteAlertDialog
+import com.example.coinscomp.presentation.uiviews.dialogs.HideCoinAlertDialog
+import com.example.coinscomp.presentation.uiviews.views.CoinCustomView
+import com.example.coinscomp.presentation.uiviews.views.NoteCustomView
+import com.example.coinscomp.presentation.utils.BottomNavigationItem
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
+private const val HOME_NAV_ITEM_INDEX = 0
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -69,9 +72,6 @@ fun HomeScreen(
     onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
     onCoinClicked: (ModelCoinsCustomView) -> Unit
 ) {
-    var selectedNavItemIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
     val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -246,34 +246,21 @@ fun HomeScreen(
                     )
                 }
             }
-            NavigationBar(Modifier.fillMaxWidth()) {
-                bottomNavigationItemsList.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = selectedNavItemIndex == index,
-                        onClick = {
-                            if (selectedNavItemIndex != index) {
-                                selectedNavItemIndex = index
-                                if (item.idRes == R.id.nav_summary) {
-                                    val intent = Intent(context, SummaryActivity::class.java)
-                                    val resetDefaultAnimation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
-                                    context.startActivity(intent, resetDefaultAnimation)
-                                }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (index == selectedNavItemIndex) {
-                                    item.selectedIcon
-                                } else {
-                                    item.unselectedIcon
-                                },
-                                contentDescription = stringResource(item.titleRes)
-                            )
-                        }
-                    )
+            BottomNavigationBar(
+                HOME_NAV_ITEM_INDEX,
+                onItemSelected = { item ->
+                    moveToSummaryActivity(context, item)
                 }
-            }
+            )
         }
+    }
+}
+
+private fun moveToSummaryActivity(context: Context, item: BottomNavigationItem) {
+    if (item.idRes == R.id.nav_summary) {
+        val intent = Intent(context, SummaryActivity::class.java)
+        val resetDefaultAnimation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
+        context.startActivity(intent, resetDefaultAnimation)
     }
 }
 

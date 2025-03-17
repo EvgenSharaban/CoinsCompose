@@ -1,27 +1,36 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.uiviews.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.coinscomp.R
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @Composable
-fun DeleteNoteAlertDialog(
+fun AddNoteAlertDialog(
     onDismiss: () -> Unit,
-    onConfirmation: () -> Unit,
+    onConfirmation: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val enteredText = remember { mutableStateOf("") }
     AlertDialog(
         title = {
-            Text(
-                text = stringResource(R.string.are_you_sure_you_want_delete_item),
-                textAlign = TextAlign.Center
+            Text(text = stringResource(R.string.add_note))
+        },
+        text = {
+            TextField(
+                value = enteredText.value,
+                onValueChange = {
+                    enteredText.value = it
+                },
+                label = { Text(stringResource(R.string.enter_note)) }
             )
         },
         onDismissRequest = {
@@ -30,7 +39,7 @@ fun DeleteNoteAlertDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirmation()
+                    onConfirmation(enteredText.value)
                 }
             ) {
                 Text(stringResource(R.string.confirm))
@@ -51,9 +60,9 @@ fun DeleteNoteAlertDialog(
 
 @Preview(showBackground = true)
 @Composable
-private fun DeleteNoteAlertDialogPreview() {
+private fun AddNoteAlertDialogPreview() {
     CoinsCompTheme {
-        DeleteNoteAlertDialog(
+        AddNoteAlertDialog(
             onDismiss = {},
             onConfirmation = {}
         )

@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.uiviews.views
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

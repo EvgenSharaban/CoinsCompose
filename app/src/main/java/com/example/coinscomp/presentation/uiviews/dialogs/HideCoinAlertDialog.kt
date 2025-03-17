@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.uiviews.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
