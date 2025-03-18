@@ -44,7 +44,7 @@ fun CustomCoin(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            .padding(start = 8.dp, end = 8.dp)
     ) {
         val (rankRef, containerRef) = createRefs()
 

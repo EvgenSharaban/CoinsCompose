@@ -4,19 +4,21 @@ import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -43,8 +45,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.coinscomp.R
-import com.example.coinscomp.core.other.TAG
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.presentation.summary.SummaryActivity
@@ -60,15 +63,36 @@ import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 private const val HOME_NAV_ITEM_INDEX = 0
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(
-    modifier: Modifier = Modifier,
+fun HomeScreen(modifier: Modifier = Modifier) {
+    val viewModel: HomeScreenViewModel = viewModel()
+
+    val loading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
+
+    HomeScreenContent(
+        itemsList = itemsList,
+        loading = loading,
+        event = event,
+        onCoinClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinClick(coin)) },
+        onCoinLongClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinLongClick(coin)) },
+        onNoteLongClicked = { note -> viewModel.handleIntent(HomeIntent.NoteLongClick(note)) },
+        onAddNote = { noteText -> viewModel.handleIntent(HomeIntent.AddNote(noteText)) },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
     itemsList: List<CustomViewListItems>,
-    positionToScrolling: Int,
-    errorMessage: String?,
-    loading: Boolean = false,
-    intentHandled: (HomeIntent) -> Unit
+    loading: Boolean,
+    event: EventsCoins,
+    onCoinClicked: (ModelCoinsCustomView) -> Unit,
+    onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
+    onNoteLongClicked: (ModelNotesCustomView) -> Unit,
+    onAddNote: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
@@ -81,20 +105,27 @@ fun HomeScreen(
         derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
     }
 
-    LaunchedEffect(errorMessage) {
-        if (!errorMessage.isNullOrBlank()) {
-            snackbarHostState.showSnackbar(
-                message = errorMessage,
-                actionLabel = okText,
-                duration = SnackbarDuration.Indefinite,
-            )
-        }
-    }
+    LaunchedEffect(event) {
+        when (event) {
+            is EventsCoins.MessageForUser -> {
+                val message = event.message
+                if (message.isNotBlank()) {
+                    snackbarHostState.showSnackbar(
+                        message = message,
+                        actionLabel = okText,
+                        duration = SnackbarDuration.Indefinite,
+                    )
+                }
+            }
 
-    LaunchedEffect(positionToScrolling) {
-        Log.d(TAG, "HomeScreen: lase visible index = $lastVisibleIndex")
-        if (positionToScrolling in itemsList.indices && positionToScrolling !in listState.firstVisibleItemIndex..lastVisibleIndex) {
-            listState.scrollToItem(positionToScrolling)
+            is EventsCoins.PositionToScrolling -> {
+                val item = event
+                if (item.position in itemsList.indices && item.position !in listState.firstVisibleItemIndex..lastVisibleIndex) {
+                    listState.scrollToItem(item.position)
+                }
+            }
+
+            is EventsCoins.None -> {}
         }
     }
 
@@ -134,50 +165,13 @@ fun HomeScreen(
                         )
                     }
                 } else {
-                    LazyColumn(state = listState) {
-                        items(
-                            items = itemsList,
-                            key = { it.hashCode() } // need for animations
-                        ) { item ->
-                            when (item) {
-                                is CustomViewListItems.CoinItem -> CustomCoin(
-                                    item = item.coin,
-                                    onCoinClicked = {
-                                        intentHandled(HomeIntent.CoinClick(item.coin))
-                                    },
-                                    onCoinLongClicked = {
-                                        openHideCoinDialog.value = item.coin
-                                    },
-                                    modifier = Modifier
-                                        .animateItem(
-                                            fadeInSpec = null,
-                                            fadeOutSpec = null,
-                                            placementSpec = spring(
-                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                stiffness = Spring.StiffnessLow
-                                            )
-                                        )
-                                )
-
-                                is CustomViewListItems.NoteItem -> CustomNote(
-                                    note = item.note.note,
-                                    modifier = Modifier
-                                        .combinedClickable(
-                                            onClick = { },
-                                            onLongClick = {
-                                                openDeleteNoteDialog.value = item.note
-                                            }
-                                        )
-                                        .animateItem(
-                                            placementSpec = spring(
-                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                stiffness = Spring.StiffnessLow
-                                            )
-                                        )
-                                )
-                            }
-                        }
-                    }
+                    ItemList(
+                        itemsList = itemsList,
+                        listState = listState,
+                        onCoinClick = { model -> onCoinClicked(model) },
+                        onCoinLongClick = { openHideCoinDialog.value = it },
+                        onNoteLongClick = { openDeleteNoteDialog.value = it }
+                    )
                 }
 
                 if (loading) {
@@ -208,7 +202,7 @@ fun HomeScreen(
                     onDismiss = { openAddNoteDialog = false },
                     onConfirmation = { enteredText ->
                         openAddNoteDialog = false
-                        intentHandled(HomeIntent.AddNote(enteredText))
+                        onAddNote(enteredText)
                     }
                 )
 
@@ -218,7 +212,7 @@ fun HomeScreen(
                         openDeleteNoteDialog.value = null
                     },
                     onConfirmation = {
-                        intentHandled(HomeIntent.NoteLongClick(openDeleteNoteDialog.value!!))
+                        onNoteLongClicked(openDeleteNoteDialog.value!!)
                         openDeleteNoteDialog.value = null
                     }
                 )
@@ -229,7 +223,7 @@ fun HomeScreen(
                         openHideCoinDialog.value = null
                     },
                     onConfirmation = {
-                        intentHandled(HomeIntent.CoinLongClick(openHideCoinDialog.value!!))
+                        onCoinLongClicked(openHideCoinDialog.value!!)
                         openHideCoinDialog.value = null
                     }
                 )
@@ -241,6 +235,59 @@ fun HomeScreen(
                     moveToSummaryActivity(context, item)
                 }
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ItemList(
+    itemsList: List<CustomViewListItems>,
+    listState: LazyListState,
+    onCoinClick: (ModelCoinsCustomView) -> Unit,
+    onCoinLongClick: (ModelCoinsCustomView) -> Unit,
+    onNoteLongClick: (ModelNotesCustomView) -> Unit
+) {
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = itemsList,
+            key = { it.hashCode() } // need for animations
+        ) { item ->
+            when (item) {
+                is CustomViewListItems.CoinItem -> CustomCoin(
+                    item = item.coin,
+                    onCoinClicked = { onCoinClick(item.coin) },
+                    onCoinLongClicked = { onCoinLongClick(item.coin) },
+                    modifier = Modifier
+                        .animateItem(
+                            fadeInSpec = null,
+                            fadeOutSpec = null,
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                )
+
+                is CustomViewListItems.NoteItem -> CustomNote(
+                    note = item.note.note,
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClick = { },
+                            onLongClick = { onNoteLongClick(item.note) }
+                        )
+                        .animateItem(
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                )
+            }
         }
     }
 }
@@ -257,12 +304,42 @@ private fun moveToSummaryActivity(context: Context, item: BottomNavigationItem) 
 @Composable
 private fun HomeScreenPreview() {
     CoinsCompTheme {
-        HomeScreen(
-            itemsList = emptyList(),
-            loading = true,
-            positionToScrolling = 0,
-            errorMessage = null,
-            intentHandled = {}
+        val notesList = List(5) { index ->
+            CustomViewListItems.NoteItem(
+                ModelNotesCustomView(
+                    id = (index + 1).toString(),
+                    note = "note ${index + 1}"
+                )
+            )
+        }
+        val coinsList = List(10) { index ->
+            CustomViewListItems.CoinItem(
+                ModelCoinsCustomView(
+                    id = (index + 1).toString(),
+                    name = "Bitcoin Fake",
+                    rank = index + 1,
+                    isActive = true,
+                    type = "coin",
+                    logo = "https://www.shutterstock.com/image-vector/crypto-currency-golden-coin-black-600nw-593193626.jpg",
+                    description = "The first and most popular cryptocurrency. The first and most popular cryptocurrency. The first and most popular cryptocurrency. The first and most popular cryptocurrency.",
+                    isHided = false,
+                    isExpanded = false,
+                    price = 2432.23,
+                    shortName = "BTC",
+                    creationDate = "21.06.1990"
+                )
+            )
+        }
+        val sampleItems = notesList.plus(coinsList)
+        HomeScreenContent(
+            itemsList = sampleItems,
+            loading = false,
+            event = EventsCoins.None(),
+            onCoinClicked = {},
+            onCoinLongClicked = {},
+            onNoteLongClicked = {},
+            onAddNote = {},
+            modifier = Modifier
         )
     }
 }

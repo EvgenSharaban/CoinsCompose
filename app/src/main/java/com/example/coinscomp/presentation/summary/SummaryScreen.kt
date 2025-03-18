@@ -19,6 +19,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.FAILURE_VALUE
 import com.example.coinscomp.presentation.coins.MainActivity
@@ -38,6 +41,21 @@ private const val SUMMARY_NAV_ITEM_INDEX = 1
 
 @Composable
 fun SummaryScreen(
+    modifier: Modifier = Modifier
+) {
+    val viewModel: SummaryScreenViewModel = viewModel()
+    val errorMessage by viewModel.event.collectAsStateWithLifecycle(null)
+    val summaryUiState by viewModel.summaryUiState.collectAsStateWithLifecycle()
+
+    SummaryScreenContent(
+        summaryScreenState = summaryUiState,
+        errorMessage = errorMessage,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SummaryScreenContent(
     summaryScreenState: SummaryScreenState,
     errorMessage: String?,
     modifier: Modifier = Modifier
@@ -158,9 +176,20 @@ private fun String.trimText(context: Context, @StringRes resource: Int): String 
 @Composable
 private fun SummaryScreenPreview() {
     CoinsCompTheme {
-        SummaryScreen(
-            summaryScreenState = SummaryScreenState.DEFAULT,
-            errorMessage = ""
+        SummaryScreenContent(
+            summaryScreenState = SummaryScreenState(
+//                summaryState = SummaryState.Loaded( // for testing
+//                    SummaryUi(
+//                        totalItemsCount = "15",
+//                        hiddenCoinsCount = "3",
+//                        totalNotesCount = "4",
+//                        dayWithMostNotes = "21.09.021",
+//                        amountOfDaysAppUsing = "34"
+//                    )),
+                summaryState = SummaryState.Default(),
+                isLoading = false
+            ),
+            errorMessage = null
         )
     }
 }

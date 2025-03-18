@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class SummaryActivityViewModel @Inject constructor(
+class SummaryScreenViewModel @Inject constructor(
     private val coinsRepository: CoinsRepository,
     private val notesRepository: NotesRepository,
     private val statisticRepository: StatisticRepository,

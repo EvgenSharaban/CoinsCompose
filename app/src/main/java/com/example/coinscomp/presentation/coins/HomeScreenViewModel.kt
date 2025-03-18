@@ -33,7 +33,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(
+class HomeScreenViewModel @Inject constructor(
     private val coinsRepository: CoinsRepository,
     private val notesRepository: NotesRepository,
     @ApplicationContext private val context: Context,
