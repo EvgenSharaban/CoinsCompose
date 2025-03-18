@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.summary
 
 import android.app.ActivityOptions
 import android.content.Context
@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.FAILURE_VALUE
 import com.example.coinscomp.presentation.coins.MainActivity
-import com.example.coinscomp.presentation.summary.SummaryScreenState
-import com.example.coinscomp.presentation.summary.SummaryState
+import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
+import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 private const val SUMMARY_NAV_ITEM_INDEX = 1

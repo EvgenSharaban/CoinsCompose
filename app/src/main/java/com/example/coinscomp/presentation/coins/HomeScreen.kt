@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews
+package com.example.coinscomp.presentation.coins
 
 import android.app.Activity
 import android.app.ActivityOptions
@@ -45,15 +45,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.TAG
-import com.example.coinscomp.presentation.coins.CustomViewListItems
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.presentation.summary.SummaryActivity
+import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
+import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.presentation.uiviews.dialogs.AddNoteAlertDialog
 import com.example.coinscomp.presentation.uiviews.dialogs.DeleteNoteAlertDialog
 import com.example.coinscomp.presentation.uiviews.dialogs.HideCoinAlertDialog
-import com.example.coinscomp.presentation.uiviews.views.CoinCustomView
-import com.example.coinscomp.presentation.uiviews.views.NoteCustomView
+import com.example.coinscomp.presentation.uiviews.widgets.CustomCoin
+import com.example.coinscomp.presentation.uiviews.widgets.CustomNote
 import com.example.coinscomp.presentation.utils.BottomNavigationItem
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
@@ -67,10 +68,7 @@ fun HomeScreen(
     positionToScrolling: Int,
     errorMessage: String?,
     loading: Boolean = false,
-    onNoteAdded: (String) -> Unit,
-    onNoteLongClicked: (ModelNotesCustomView) -> Unit,
-    onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
-    onCoinClicked: (ModelCoinsCustomView) -> Unit
+    intentHandled: (HomeIntent) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -142,17 +140,10 @@ fun HomeScreen(
                             key = { it.hashCode() } // need for animations
                         ) { item ->
                             when (item) {
-                                is CustomViewListItems.CoinItem -> CoinCustomView(
-                                    rank = item.coin.rank.toString(),
-                                    name = item.coin.name,
-                                    price = item.coin.price.toString(),
-                                    description = item.coin.description,
-                                    creationDate = item.coin.creationDate,
-                                    shortName = item.coin.shortName,
-                                    logo = item.coin.logo,
-                                    isExpanded = item.coin.isExpanded,
+                                is CustomViewListItems.CoinItem -> CustomCoin(
+                                    item = item.coin,
                                     onCoinClicked = {
-                                        onCoinClicked(item.coin)
+                                        intentHandled(HomeIntent.CoinClick(item.coin))
                                     },
                                     onCoinLongClicked = {
                                         openHideCoinDialog.value = item.coin
@@ -168,7 +159,7 @@ fun HomeScreen(
                                         )
                                 )
 
-                                is CustomViewListItems.NoteItem -> NoteCustomView(
+                                is CustomViewListItems.NoteItem -> CustomNote(
                                     note = item.note.note,
                                     modifier = Modifier
                                         .combinedClickable(
@@ -212,40 +203,38 @@ fun HomeScreen(
                     )
                 }
 
-                if (openAddNoteDialog) {
-                    AddNoteAlertDialog(
-                        onDismiss = { openAddNoteDialog = false },
-                        onConfirmation = { enteredText ->
-                            openAddNoteDialog = false
-                            onNoteAdded(enteredText)
-                        }
-                    )
-                }
+                AddNoteAlertDialog(
+                    openDialog = openAddNoteDialog,
+                    onDismiss = { openAddNoteDialog = false },
+                    onConfirmation = { enteredText ->
+                        openAddNoteDialog = false
+                        intentHandled(HomeIntent.AddNote(enteredText))
+                    }
+                )
 
-                if (openDeleteNoteDialog.value != null) {
-                    DeleteNoteAlertDialog(
-                        onDismiss = {
-                            openDeleteNoteDialog.value = null
-                        },
-                        onConfirmation = {
-                            onNoteLongClicked(openDeleteNoteDialog.value!!)
-                            openDeleteNoteDialog.value = null
-                        }
-                    )
-                }
+                DeleteNoteAlertDialog(
+                    openDialog = openDeleteNoteDialog.value != null,
+                    onDismiss = {
+                        openDeleteNoteDialog.value = null
+                    },
+                    onConfirmation = {
+                        intentHandled(HomeIntent.NoteLongClick(openDeleteNoteDialog.value!!))
+                        openDeleteNoteDialog.value = null
+                    }
+                )
 
-                if (openHideCoinDialog.value != null) {
-                    HideCoinAlertDialog(
-                        onDismiss = {
-                            openHideCoinDialog.value = null
-                        },
-                        onConfirmation = {
-                            onCoinLongClicked(openHideCoinDialog.value!!)
-                            openHideCoinDialog.value = null
-                        }
-                    )
-                }
+                HideCoinAlertDialog(
+                    openDialog = openHideCoinDialog.value != null,
+                    onDismiss = {
+                        openHideCoinDialog.value = null
+                    },
+                    onConfirmation = {
+                        intentHandled(HomeIntent.CoinLongClick(openHideCoinDialog.value!!))
+                        openHideCoinDialog.value = null
+                    }
+                )
             }
+
             BottomNavigationBar(
                 HOME_NAV_ITEM_INDEX,
                 onItemSelected = { item ->
@@ -270,13 +259,10 @@ private fun HomeScreenPreview() {
     CoinsCompTheme {
         HomeScreen(
             itemsList = emptyList(),
-            loading = false,
+            loading = true,
             positionToScrolling = 0,
             errorMessage = null,
-            onNoteAdded = {},
-            onNoteLongClicked = {},
-            onCoinLongClicked = {},
-            onCoinClicked = {}
+            intentHandled = {}
         )
     }
 }

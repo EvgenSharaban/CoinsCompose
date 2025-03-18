@@ -13,10 +13,12 @@ import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @Composable
 fun DeleteNoteAlertDialog(
+    openDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (!openDialog) return
     AlertDialog(
         title = {
             Text(
@@ -54,6 +56,7 @@ fun DeleteNoteAlertDialog(
 private fun DeleteNoteAlertDialogPreview() {
     CoinsCompTheme {
         DeleteNoteAlertDialog(
+            true,
             onDismiss = {},
             onConfirmation = {}
         )

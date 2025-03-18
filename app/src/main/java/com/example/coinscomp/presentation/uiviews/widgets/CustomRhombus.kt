@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews.views
+package com.example.coinscomp.presentation.uiviews.widgets
 
 import android.util.TypedValue
 import androidx.compose.foundation.layout.Box
@@ -30,7 +30,7 @@ import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 // used RhombusView from core/widgets, implemented ability to rounding corners and stretching
 @Composable
-fun RhombusTextView(
+fun CustomRhombus(
     text: String,
     modifier: Modifier = Modifier,
     backColor: Color = Color.Red,
@@ -53,7 +53,7 @@ fun RhombusTextView(
 
 // alternative variant with rounded corners, can't be stretched
 @Composable
-fun RhombusTextView2(
+fun CustomRhombus2(
     text: String,
     modifier: Modifier = Modifier,
     backColor: Color = Color.Red,
@@ -94,7 +94,7 @@ fun RhombusTextView2(
 
 // alternative variant without rounded corners, can be stretch, may have a stroke instead of a fill with rounded corners (commented)
 @Composable
-fun RhombusTextView3(
+fun CustomRhombus3(
     text: String,
     modifier: Modifier = Modifier,
     backColor: Color = Color.Red,
@@ -154,9 +154,9 @@ private fun RhombusView.updateRhombus(
 
 @Preview(showBackground = true)
 @Composable
-private fun RhombusTextPreview() {
+private fun CustomRhombusPreview() {
     CoinsCompTheme {
-        RhombusTextView(
+        CustomRhombus(
             text = "12",
             modifier = Modifier
                 .width(88.dp)

@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.uiviews.views
+package com.example.coinscomp.presentation.uiviews.widgets
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @Composable
-fun NoteCustomView(
+fun CustomNote(
     note: String,
     modifier: Modifier = Modifier
 ) {
@@ -35,9 +35,9 @@ fun NoteCustomView(
 
 @Preview(showBackground = true)
 @Composable
-private fun NoteCustomViewPreview() {
+private fun CustomNotePreview() {
     CoinsCompTheme {
-        NoteCustomView(
+        CustomNote(
             "TRjds"
         )
     }

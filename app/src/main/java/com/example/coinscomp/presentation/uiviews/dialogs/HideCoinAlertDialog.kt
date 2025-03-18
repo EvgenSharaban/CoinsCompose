@@ -11,10 +11,12 @@ import com.example.coinscomp.R
 
 @Composable
 fun HideCoinAlertDialog(
+    openDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirmation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (!openDialog) return
     AlertDialog(
         title = {
             Text(

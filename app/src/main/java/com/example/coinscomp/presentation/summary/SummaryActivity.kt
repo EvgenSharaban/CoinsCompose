@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.coinscomp.presentation.uiviews.SummaryScreen
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 

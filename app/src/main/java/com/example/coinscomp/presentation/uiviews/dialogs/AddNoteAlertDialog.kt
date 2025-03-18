@@ -15,10 +15,12 @@ import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @Composable
 fun AddNoteAlertDialog(
+    openDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirmation: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (!openDialog) return
     val enteredText = remember { mutableStateOf("") }
     AlertDialog(
         title = {
@@ -63,6 +65,7 @@ fun AddNoteAlertDialog(
 private fun AddNoteAlertDialogPreview() {
     CoinsCompTheme {
         AddNoteAlertDialog(
+            true,
             onDismiss = {},
             onConfirmation = {}
         )

@@ -1,11 +1,10 @@
-package com.example.coinscomp.presentation.uiviews.views
+package com.example.coinscomp.presentation.uiviews.widgets
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -18,8 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,26 +26,20 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil3.compose.AsyncImage
 import com.example.coinscomp.R
+import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
+import com.example.coinscomp.presentation.uiviews.RoundImage
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CoinCustomView(
-    rank: String,
-    name: String,
-    price: String,
-    description: String,
-    creationDate: String,
-    shortName: String,
-    logo: String?,
-    isExpanded: Boolean,
+fun CustomCoin(
+    item: ModelCoinsCustomView,
     onCoinClicked: () -> Unit,
     onCoinLongClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var localIsExpanded by remember { mutableStateOf(isExpanded) }
+    var localIsExpanded by remember { mutableStateOf(item.isExpanded) }
 
     ConstraintLayout(
         modifier = modifier
@@ -57,8 +48,8 @@ fun CoinCustomView(
     ) {
         val (rankRef, containerRef) = createRefs()
 
-        RhombusTextView(
-            text = rank,
+        CustomRhombus(
+            text = item.rank.toString(),
             textSize = 24.sp,
             backColor = Color(0xFFFFA500), // remove static color
             cornerRadius = 16f,
@@ -102,7 +93,7 @@ fun CoinCustomView(
                 val (nameRef, priceRef, logoRef, descriptionRef, dateRef, shortNameRef) = createRefs()
 
                 Text(
-                    text = name,
+                    text = item.name,
                     fontSize = 30.sp,
                     lineHeight = 1.2.em,
                     modifier = Modifier
@@ -115,7 +106,7 @@ fun CoinCustomView(
                 )
 
                 Text(
-                    text = stringResource(R.string.price_for_coin, price),
+                    text = stringResource(R.string.price_for_coin, item.price),
                     fontSize = 18.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -128,9 +119,8 @@ fun CoinCustomView(
                         }
                 )
 
-                Card(
-                    shape = CircleShape,
-                    elevation = CardDefaults.cardElevation(0.dp),
+                RoundImage(
+                    logo = item.logo,
                     modifier = Modifier
                         .size(56.dp)
                         .constrainAs(logoRef) {
@@ -139,18 +129,11 @@ fun CoinCustomView(
                             top.linkTo(nameRef.bottom, margin = 8.dp)
                             horizontalBias = 0f
                         }
-                ) {
-                    AsyncImage(
-                        model = logo,
-                        placeholder = painterResource(R.drawable.case_detail_sample),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                )
 
-                if (isExpanded) {
+                if (item.isExpanded) {
                     Text(
-                        text = description,
+                        text = item.description,
                         textAlign = TextAlign.End,
                         fontSize = 16.sp,
                         modifier = Modifier
@@ -165,7 +148,7 @@ fun CoinCustomView(
                 }
 
                 Text(
-                    text = creationDate,
+                    text = item.creationDate,
                     fontSize = 14.sp,
                     modifier = Modifier
                         .constrainAs(dateRef) {
@@ -178,8 +161,8 @@ fun CoinCustomView(
                         }
                 )
 
-                RhombusTextView(
-                    text = shortName,
+                CustomRhombus(
+                    text = item.shortName,
                     backColor = Color.White,
                     cornerRadius = 8f,
                     textColor = Color.Black,
@@ -198,17 +181,21 @@ fun CoinCustomView(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun CustomCardPreview() {
+private fun CustomCoinPreview() {
     CoinsCompTheme {
-        CoinCustomView(
-            rank = "5",
-            name = "Bitcoin Fake",
-            price = "933532.32",
-            description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
-            creationDate = "Since 2009.12.12",
-            shortName = "BTC",
-            logo = null,
-            isExpanded = false,
+        CustomCoin(
+            item = ModelCoinsCustomView(
+                rank = 5,
+                name = "Bitcoin Fake",
+                price = 933532.32,
+                description = "skjd skjahg hjf hjkkgfg hsdh skjd skjahg hjf hjkkgfg hsdh kkgfgdjghksjdhgksdhkhkgshkgshkh hsghkhk hkjhsgk hkshksghkhgkjhkjsgh sghk khkdhgjkshk  hsdh skjhgh sghskghskjd skjahg hjf hjkkgfg hsdh skjhgh sghskgh",
+                creationDate = "Since 2009.12.12",
+                shortName = "BTC",
+                logo = "",
+                id = "ew",
+                isActive = true,
+                type = "coin"
+            ),
             onCoinClicked = {},
             onCoinLongClicked = {}
         )

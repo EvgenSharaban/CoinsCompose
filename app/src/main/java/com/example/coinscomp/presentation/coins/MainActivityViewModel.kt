@@ -16,6 +16,7 @@ import com.example.coinscomp.presentation.coins.models.coins.CoinUiModelMapper.m
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.presentation.coins.models.notes.NoteUiModelMapper.mapToNoteUiModel
+import com.example.coinscomp.presentation.coins.models.notes.NoteUiModelMapper.mapToRoomModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
@@ -75,7 +76,27 @@ class MainActivityViewModel @Inject constructor(
         observeData()
     }
 
-    fun onItemCoinClicked(item: ModelCoinsCustomView) {
+    fun handleIntent(homeIntent: HomeIntent) {
+        when (homeIntent) {
+            is HomeIntent.AddNote -> {
+                addNote(homeIntent.note)
+            }
+
+            is HomeIntent.CoinClick -> {
+                onItemCoinClicked(homeIntent.model)
+            }
+
+            is HomeIntent.CoinLongClick -> {
+                onItemCoinLongClicked(homeIntent.model)
+            }
+
+            is HomeIntent.NoteLongClick -> {
+                onItemNoteLongClicked(homeIntent.model.mapToRoomModel())
+            }
+        }
+    }
+
+    private fun onItemCoinClicked(item: ModelCoinsCustomView) {
         Log.d(TAG, "onItemCoinClicked: clickedId = ${item.id}, expandedCoinItemsIds = ${expandedCoinItemsIds.value}")
         expandedCoinItemsIds.update {
             if (expandedCoinItemsIds.value.contains(item.id)) {
@@ -86,11 +107,11 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun onItemCoinLongClicked(item: ModelCoinsCustomView) {
+    private fun onItemCoinLongClicked(item: ModelCoinsCustomView) {
         setHiddenCoinsToStorage(item.id)
     }
 
-    fun addNote(noteText: String) {
+    private fun addNote(noteText: String) {
         viewModelScope.launch {
             setLoading(true)
             val note = NoteRoomEntity(
@@ -103,7 +124,7 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun onItemNoteLongClicked(note: NoteRoomEntity) {
+    private fun onItemNoteLongClicked(note: NoteRoomEntity) {
         viewModelScope.launch {
             setLoading(true)
             notesRepository.deleteNote(note)

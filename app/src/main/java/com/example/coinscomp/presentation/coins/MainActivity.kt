@@ -11,8 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.coinscomp.core.other.DEFAULT_SCROLLING_POSITION
-import com.example.coinscomp.presentation.coins.models.notes.NoteUiModelMapper.mapToRoomModel
-import com.example.coinscomp.presentation.uiviews.HomeScreen
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -54,17 +52,8 @@ class MainActivity : ComponentActivity() {
                     loading = loading,
                     positionToScrolling = scrollingListPosition.intValue,
                     errorMessage = errorMessage.value,
-                    onNoteAdded = { enteredNote ->
-                        viewModel.addNote(enteredNote)
-                    },
-                    onNoteLongClicked = { note ->
-                        viewModel.onItemNoteLongClicked(note.mapToRoomModel())
-                    },
-                    onCoinLongClicked = { coin ->
-                        viewModel.onItemCoinLongClicked(coin)
-                    },
-                    onCoinClicked = { coin ->
-                        viewModel.onItemCoinClicked(coin)
+                    intentHandled = { intent ->
+                        viewModel.handleIntent(intent)
                     }
                 )
                 // need to scrolling after deleting and adding all notes
