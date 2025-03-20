@@ -181,7 +181,7 @@ private fun HomeScreenContent(
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = 16.dp, end = 32.dp),
+                        .padding(bottom = 16.dp, end = 24.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
