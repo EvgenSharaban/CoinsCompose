@@ -33,12 +33,8 @@ import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
-import kotlinx.serialization.Serializable
 
 private const val SUMMARY_NAV_ITEM_INDEX = 1
-
-@Serializable
-object Summary
 
 @Composable
 fun SummaryScreen(

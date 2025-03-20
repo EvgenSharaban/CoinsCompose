@@ -53,12 +53,8 @@ import com.example.coinscomp.presentation.uiviews.widgets.CustomCoin
 import com.example.coinscomp.presentation.uiviews.widgets.CustomNote
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
-import kotlinx.serialization.Serializable
 
 private const val HOME_NAV_ITEM_INDEX = 0
-
-@Serializable
-object Home
 
 @Composable
 fun HomeScreen(

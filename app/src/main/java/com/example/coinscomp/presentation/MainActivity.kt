@@ -9,11 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.coinscomp.presentation.coins.Home
 import com.example.coinscomp.presentation.coins.HomeScreen
-import com.example.coinscomp.presentation.summary.Summary
 import com.example.coinscomp.presentation.summary.SummaryScreen
 import com.example.coinscomp.presentation.utils.NavigationItems
+import com.example.coinscomp.presentation.utils.NavigationTypes.HomeType
+import com.example.coinscomp.presentation.utils.NavigationTypes.SummaryType
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,27 +34,27 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         val doOnNavigationItemSelected: (NavigationItems) -> Unit = { item ->
             val destination = when (item) {
-                NavigationItems.HOME -> Home
-                NavigationItems.SUMMARY -> Summary
+                NavigationItems.HOME_NAV_ITEM -> HomeType
+                NavigationItems.SUMMARY_NAV_ITEM -> SummaryType
             }
             navController.navigate(route = destination)
         }
         CoinsCompTheme {
             NavHost(
                 navController,
-                startDestination = Home
+                startDestination = HomeType
             ) {
-                composable<Home> {
+                composable<HomeType> {
                     HomeScreen(doOnNavigationItemSelected)
                     BackHandler {
                         finish()
                     }
                 }
-                composable<Summary> {
+                composable<SummaryType> {
                     SummaryScreen(doOnNavigationItemSelected)
                     BackHandler {
-                        navController.navigate(Home) {
-                            popUpTo(Home) { inclusive = false }
+                        navController.navigate(HomeType) {
+                            popUpTo(HomeType) { inclusive = false }
                         }
                     }
                 }
