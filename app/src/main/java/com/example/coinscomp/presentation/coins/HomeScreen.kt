@@ -1,10 +1,5 @@
 package com.example.coinscomp.presentation.coins
 
-import android.app.Activity
-import android.app.ActivityOptions
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -41,16 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.coinscomp.R
 import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomView
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
-import com.example.coinscomp.presentation.summary.SummaryActivity
 import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.presentation.uiviews.dialogs.AddNoteAlertDialog
@@ -58,14 +51,21 @@ import com.example.coinscomp.presentation.uiviews.dialogs.DeleteNoteAlertDialog
 import com.example.coinscomp.presentation.uiviews.dialogs.HideCoinAlertDialog
 import com.example.coinscomp.presentation.uiviews.widgets.CustomCoin
 import com.example.coinscomp.presentation.uiviews.widgets.CustomNote
-import com.example.coinscomp.presentation.utils.BottomNavigationItem
+import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
+import kotlinx.serialization.Serializable
 
 private const val HOME_NAV_ITEM_INDEX = 0
 
+@Serializable
+object Home
+
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    val viewModel: HomeScreenViewModel = viewModel()
+fun HomeScreen(
+    onNavigationItemSelected: (NavigationItems) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val viewModel: HomeScreenViewModel = hiltViewModel()
 
     val loading by viewModel.isLoading.collectAsStateWithLifecycle()
     val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
@@ -79,6 +79,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         onCoinLongClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinLongClick(coin)) },
         onNoteLongClicked = { note -> viewModel.handleIntent(HomeIntent.NoteLongClick(note)) },
         onAddNote = { noteText -> viewModel.handleIntent(HomeIntent.AddNote(noteText)) },
+        onNavigationItemSelected = onNavigationItemSelected,
         modifier = modifier
     )
 }
@@ -92,9 +93,9 @@ private fun HomeScreenContent(
     onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
     onNoteLongClicked: (ModelNotesCustomView) -> Unit,
     onAddNote: (String) -> Unit,
+    onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
@@ -127,10 +128,6 @@ private fun HomeScreenContent(
 
             is EventsCoins.None -> {}
         }
-    }
-
-    BackHandler {
-        (context as? Activity)?.finishAffinity()
     }
 
     Scaffold(
@@ -232,7 +229,7 @@ private fun HomeScreenContent(
             BottomNavigationBar(
                 HOME_NAV_ITEM_INDEX,
                 onItemSelected = { item ->
-                    moveToSummaryActivity(context, item)
+                    onNavigationItemSelected(item)
                 }
             )
         }
@@ -292,14 +289,6 @@ private fun ItemList(
     }
 }
 
-private fun moveToSummaryActivity(context: Context, item: BottomNavigationItem) {
-    if (item.idRes == R.id.nav_summary) {
-        val intent = Intent(context, SummaryActivity::class.java)
-        val resetDefaultAnimation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
-        context.startActivity(intent, resetDefaultAnimation)
-    }
-}
-
 @Preview(showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {
@@ -339,6 +328,7 @@ private fun HomeScreenPreview() {
             onCoinLongClicked = {},
             onNoteLongClicked = {},
             onAddNote = {},
+            onNavigationItemSelected = {},
             modifier = Modifier
         )
     }

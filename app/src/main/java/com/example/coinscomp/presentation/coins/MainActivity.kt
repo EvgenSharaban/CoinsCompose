@@ -2,8 +2,16 @@ package com.example.coinscomp.presentation.coins
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.coinscomp.presentation.summary.Summary
+import com.example.coinscomp.presentation.summary.SummaryScreen
+import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,8 +23,39 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CoinsCompTheme {
-                HomeScreen()
+            InitNavigationBetweenScreens()
+        }
+    }
+
+    @Composable
+    private fun InitNavigationBetweenScreens() {
+        val navController = rememberNavController()
+        val doOnNavigationItemSelected: (NavigationItems) -> Unit = { item ->
+            val destination = when (item) {
+                NavigationItems.HOME -> Home
+                NavigationItems.SUMMARY -> Summary
+            }
+            navController.navigate(route = destination)
+        }
+        CoinsCompTheme {
+            NavHost(
+                navController,
+                startDestination = Home
+            ) {
+                composable<Home> {
+                    HomeScreen(doOnNavigationItemSelected)
+                    BackHandler {
+                        finish()
+                    }
+                }
+                composable<Summary> {
+                    SummaryScreen(doOnNavigationItemSelected)
+                    BackHandler {
+                        navController.navigate(Home) {
+                            popUpTo(Home) { inclusive = false }
+                        }
+                    }
+                }
             }
         }
     }

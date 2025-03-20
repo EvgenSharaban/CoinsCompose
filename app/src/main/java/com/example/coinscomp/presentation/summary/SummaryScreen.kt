@@ -1,9 +1,6 @@
 package com.example.coinscomp.presentation.summary
 
-import android.app.ActivityOptions
 import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,28 +25,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.FAILURE_VALUE
-import com.example.coinscomp.presentation.coins.MainActivity
 import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
+import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
+import kotlinx.serialization.Serializable
 
 private const val SUMMARY_NAV_ITEM_INDEX = 1
 
+@Serializable
+object Summary
+
 @Composable
 fun SummaryScreen(
+    onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: SummaryScreenViewModel = viewModel()
+    val viewModel: SummaryScreenViewModel = hiltViewModel()
     val errorMessage by viewModel.event.collectAsStateWithLifecycle(null)
     val summaryUiState by viewModel.summaryUiState.collectAsStateWithLifecycle()
 
     SummaryScreenContent(
         summaryScreenState = summaryUiState,
         errorMessage = errorMessage,
+        onNavigationItemSelected = onNavigationItemSelected,
         modifier = modifier
     )
 }
@@ -58,16 +61,13 @@ fun SummaryScreen(
 fun SummaryScreenContent(
     summaryScreenState: SummaryScreenState,
     errorMessage: String?,
+    onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
-
-    BackHandler {
-        moveToHomePage(context)
-    }
 
     LaunchedEffect(errorMessage) {
         if (!errorMessage.isNullOrBlank()) {
@@ -149,19 +149,11 @@ fun SummaryScreenContent(
             BottomNavigationBar(
                 selectedIndex = SUMMARY_NAV_ITEM_INDEX,
                 onItemSelected = { item ->
-                    if (item.idRes == R.id.nav_home) {
-                        moveToHomePage(context)
-                    }
+                    onNavigationItemSelected(item)
                 }
             )
         }
     }
-}
-
-private fun moveToHomePage(context: Context) {
-    val intent = Intent(context, MainActivity::class.java)
-    val resetDefaultAnimation = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
-    context.startActivity(intent, resetDefaultAnimation)
 }
 
 private fun String.trimText(context: Context, @StringRes resource: Int): String {
@@ -189,6 +181,7 @@ private fun SummaryScreenPreview() {
                 summaryState = SummaryState.Default(),
                 isLoading = false
             ),
+            onNavigationItemSelected = {},
             errorMessage = null
         )
     }

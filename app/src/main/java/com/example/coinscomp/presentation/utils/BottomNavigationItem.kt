@@ -1,6 +1,5 @@
 package com.example.coinscomp.presentation.utils
 
-import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -10,24 +9,24 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.coinscomp.R
 
-data class BottomNavigationItem(
-    @IdRes val idRes: Int,
+val bottomNavigationItemsList = listOf(
+    NavigationItems.HOME,
+    NavigationItems.SUMMARY
+)
+
+enum class NavigationItems(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
     @StringRes val titleRes: Int
-)
-
-val bottomNavigationItemsList = listOf(
-    BottomNavigationItem(
-        idRes = R.id.nav_home,
+) {
+    HOME(
         selectedIcon = Icons.Filled.Home,
         unselectedIcon = Icons.Outlined.Home,
         titleRes = R.string.home
     ),
-    BottomNavigationItem(
-        idRes = R.id.nav_summary,
+    SUMMARY(
         selectedIcon = Icons.Filled.Info,
         unselectedIcon = Icons.Outlined.Info,
         titleRes = R.string.summary
     )
-)
+}
