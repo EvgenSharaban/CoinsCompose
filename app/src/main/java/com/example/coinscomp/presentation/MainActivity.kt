@@ -1,4 +1,4 @@
-package com.example.coinscomp.presentation.coins
+package com.example.coinscomp.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.coinscomp.presentation.coins.Home
+import com.example.coinscomp.presentation.coins.HomeScreen
 import com.example.coinscomp.presentation.summary.Summary
 import com.example.coinscomp.presentation.summary.SummaryScreen
 import com.example.coinscomp.presentation.utils.NavigationItems
