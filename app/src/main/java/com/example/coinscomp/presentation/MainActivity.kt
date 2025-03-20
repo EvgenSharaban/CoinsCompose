@@ -12,8 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.coinscomp.presentation.coins.HomeScreen
 import com.example.coinscomp.presentation.summary.SummaryScreen
 import com.example.coinscomp.presentation.utils.NavigationItems
-import com.example.coinscomp.presentation.utils.NavigationTypes.HomeType
-import com.example.coinscomp.presentation.utils.NavigationTypes.SummaryType
+import com.example.coinscomp.presentation.utils.NavigationItems.HOME_ITEM
+import com.example.coinscomp.presentation.utils.NavigationItems.SUMMARY_ITEM
 import com.example.coinscomp.ui.theme.CoinsCompTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,28 +33,24 @@ class MainActivity : ComponentActivity() {
     private fun InitNavigationBetweenScreens() {
         val navController = rememberNavController()
         val doOnNavigationItemSelected: (NavigationItems) -> Unit = { item ->
-            val destination = when (item) {
-                NavigationItems.HOME_NAV_ITEM -> HomeType
-                NavigationItems.SUMMARY_NAV_ITEM -> SummaryType
-            }
-            navController.navigate(route = destination)
+            navController.navigate(route = item.route)
         }
         CoinsCompTheme {
             NavHost(
                 navController,
-                startDestination = HomeType
+                startDestination = HOME_ITEM.route
             ) {
-                composable<HomeType> {
+                composable(HOME_ITEM.route) {
                     HomeScreen(doOnNavigationItemSelected)
                     BackHandler {
                         finish()
                     }
                 }
-                composable<SummaryType> {
+                composable(SUMMARY_ITEM.route) {
                     SummaryScreen(doOnNavigationItemSelected)
                     BackHandler {
-                        navController.navigate(HomeType) {
-                            popUpTo(HomeType) { inclusive = false }
+                        navController.navigate(HOME_ITEM.route) {
+                            popUpTo(HOME_ITEM.route) { inclusive = false }
                         }
                     }
                 }
