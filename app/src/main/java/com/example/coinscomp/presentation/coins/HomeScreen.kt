@@ -28,7 +28,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +45,7 @@ import com.example.coinscomp.presentation.coins.models.coins.ModelCoinsCustomVie
 import com.example.coinscomp.presentation.coins.models.notes.ModelNotesCustomView
 import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
+import com.example.coinscomp.presentation.uiviews.ObserveAsEvents
 import com.example.coinscomp.presentation.uiviews.dialogs.AddNoteAlertDialog
 import com.example.coinscomp.presentation.uiviews.dialogs.DeleteNoteAlertDialog
 import com.example.coinscomp.presentation.uiviews.dialogs.HideCoinAlertDialog
@@ -53,6 +53,10 @@ import com.example.coinscomp.presentation.uiviews.widgets.CustomCoin
 import com.example.coinscomp.presentation.uiviews.widgets.CustomNote
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 private const val HOME_NAV_ITEM_INDEX = 0
 
@@ -63,14 +67,10 @@ fun HomeScreen(
 ) {
     val viewModel: HomeScreenViewModel = hiltViewModel()
 
-    val loading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
-    val event by viewModel.event.collectAsStateWithLifecycle(EventsCoins.None())
-
     HomeScreenContent(
-        itemsList = itemsList,
-        loading = loading,
-        event = event,
+        itemsListFlow = viewModel.itemsList,
+        loadingFlow = viewModel.isLoading,
+        event = viewModel.event,
         onCoinClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinClick(coin)) },
         onCoinLongClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinLongClick(coin)) },
         onNoteLongClicked = { note -> viewModel.handleIntent(HomeIntent.NoteLongClick(note)) },
@@ -82,9 +82,9 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContent(
-    itemsList: List<CustomViewListItems>,
-    loading: Boolean,
-    event: EventsCoins,
+    itemsListFlow: StateFlow<List<CustomViewListItems>>,
+    loadingFlow: StateFlow<Boolean>,
+    event: Flow<EventsCoins>,
     onCoinClicked: (ModelCoinsCustomView) -> Unit,
     onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
     onNoteLongClicked: (ModelNotesCustomView) -> Unit,
@@ -92,6 +92,8 @@ private fun HomeScreenContent(
     onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val itemsList by itemsListFlow.collectAsStateWithLifecycle()
+    val loading by loadingFlow.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
@@ -102,7 +104,7 @@ private fun HomeScreenContent(
         derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
     }
 
-    LaunchedEffect(event) {
+    ObserveAsEvents(event) { event ->
         when (event) {
             is EventsCoins.MessageForUser -> {
                 val message = event.message
@@ -121,8 +123,6 @@ private fun HomeScreenContent(
                     listState.scrollToItem(item.position)
                 }
             }
-
-            is EventsCoins.None -> {}
         }
     }
 
@@ -130,9 +130,7 @@ private fun HomeScreenContent(
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                snackbar = { data ->
-                    CustomSnackbar(data)
-                }
+                snackbar = { data -> CustomSnackbar(data) }
             )
         }
     ) { innerPadding ->
@@ -176,9 +174,7 @@ private fun HomeScreenContent(
                 }
 
                 FloatingActionButton(
-                    onClick = {
-                        openAddNoteDialog = true
-                    },
+                    onClick = { openAddNoteDialog = true },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(bottom = 16.dp, end = 24.dp),
@@ -201,9 +197,7 @@ private fun HomeScreenContent(
 
                 DeleteNoteAlertDialog(
                     openDialog = openDeleteNoteDialog.value != null,
-                    onDismiss = {
-                        openDeleteNoteDialog.value = null
-                    },
+                    onDismiss = { openDeleteNoteDialog.value = null },
                     onConfirmation = {
                         onNoteLongClicked(openDeleteNoteDialog.value!!)
                         openDeleteNoteDialog.value = null
@@ -212,9 +206,7 @@ private fun HomeScreenContent(
 
                 HideCoinAlertDialog(
                     openDialog = openHideCoinDialog.value != null,
-                    onDismiss = {
-                        openHideCoinDialog.value = null
-                    },
+                    onDismiss = { openHideCoinDialog.value = null },
                     onConfirmation = {
                         onCoinLongClicked(openHideCoinDialog.value!!)
                         openHideCoinDialog.value = null
@@ -224,9 +216,7 @@ private fun HomeScreenContent(
 
             BottomNavigationBar(
                 HOME_NAV_ITEM_INDEX,
-                onItemSelected = { item ->
-                    onNavigationItemSelected(item)
-                }
+                onItemSelected = { item -> onNavigationItemSelected(item) }
             )
         }
     }
@@ -317,9 +307,9 @@ private fun HomeScreenPreview() {
         }
         val sampleItems = notesList.plus(coinsList)
         HomeScreenContent(
-            itemsList = sampleItems,
-            loading = false,
-            event = EventsCoins.None(),
+            itemsListFlow = MutableStateFlow(sampleItems),
+            loadingFlow = MutableStateFlow(false),
+            event = flowOf(),
             onCoinClicked = {},
             onCoinLongClicked = {},
             onNoteLongClicked = {},
