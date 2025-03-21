@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.coinscomp.R
 import com.example.coinscomp.core.other.FAILURE_VALUE
+import com.example.coinscomp.presentation.summary.models.SummaryUi
 import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.presentation.utils.NavigationItems
@@ -162,19 +163,49 @@ private fun String.trimText(context: Context, @StringRes resource: Int): String 
 
 @Preview(showSystemUi = true)
 @Composable
-private fun SummaryScreenPreview() {
+private fun SummaryScreenDefaultPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
             summaryScreenState = SummaryScreenState(
-//                summaryState = SummaryState.Loaded( // for testing
-//                    SummaryUi(
-//                        totalItemsCount = "15",
-//                        hiddenCoinsCount = "3",
-//                        totalNotesCount = "4",
-//                        dayWithMostNotes = "21.09.021",
-//                        amountOfDaysAppUsing = "34"
-//                    )),
                 summaryState = SummaryState.Default(),
+                isLoading = false
+            ),
+            onNavigationItemSelected = {},
+            errorMessage = null
+        )
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun SummaryScreenLoadingPreview() {
+    CoinsCompTheme {
+        SummaryScreenContent(
+            summaryScreenState = SummaryScreenState(
+                summaryState = SummaryState.Default(),
+                isLoading = true
+            ),
+            onNavigationItemSelected = {},
+            errorMessage = null
+        )
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun SummaryScreenLoadedPreview() {
+    CoinsCompTheme {
+        SummaryScreenContent(
+            summaryScreenState = SummaryScreenState(
+                summaryState = SummaryState.Loaded( // for testing
+                    SummaryUi(
+                        totalItemsCount = "15",
+                        hiddenCoinsCount = "3",
+                        totalNotesCount = "4",
+                        dayWithMostNotes = "21.09.021",
+                        amountOfDaysAppUsing = "34"
+                    )
+                ),
                 isLoading = false
             ),
             onNavigationItemSelected = {},

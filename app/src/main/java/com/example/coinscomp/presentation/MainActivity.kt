@@ -25,12 +25,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            InitNavigationBetweenScreens()
+            Navigation()
         }
     }
 
     @Composable
-    private fun InitNavigationBetweenScreens() {
+    private fun Navigation() {
         val navController = rememberNavController()
         val doOnNavigationItemSelected: (NavigationItems) -> Unit = { item ->
             navController.navigate(route = item.route)
