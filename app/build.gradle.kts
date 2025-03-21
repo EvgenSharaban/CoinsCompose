@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -25,10 +28,35 @@ android {
         }
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties().apply {
+        load(FileInputStream(keystorePropertiesFile))
+    }
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file(keystoreProperties.getProperty("keystore.path"))
+            storePassword = keystoreProperties.getProperty("keystore.password")
+            keyAlias = keystoreProperties.getProperty("keystore.key.alias")
+            keyPassword = keystoreProperties.getProperty("keystore.key.password")
+        }
+        create("release") {
+            storeFile = file(keystoreProperties.getProperty("keystore.path"))
+            storePassword = keystoreProperties.getProperty("keystore.password")
+            keyAlias = keystoreProperties.getProperty("keystore.key.alias")
+            keyPassword = keystoreProperties.getProperty("keystore.key.password")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+            isDebuggable = false
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = true
         }
     }
     compileOptions {
