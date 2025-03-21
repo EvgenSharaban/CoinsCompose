@@ -15,7 +15,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,8 +31,13 @@ import com.example.coinscomp.core.other.FAILURE_VALUE
 import com.example.coinscomp.presentation.summary.models.SummaryUi
 import com.example.coinscomp.presentation.uiviews.BottomNavigationBar
 import com.example.coinscomp.presentation.uiviews.CustomSnackbar
+import com.example.coinscomp.presentation.uiviews.ObserveAsEvents
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 private const val SUMMARY_NAV_ITEM_INDEX = 1
 
@@ -43,12 +47,10 @@ fun SummaryScreen(
     modifier: Modifier = Modifier
 ) {
     val viewModel: SummaryScreenViewModel = hiltViewModel()
-    val errorMessage by viewModel.event.collectAsStateWithLifecycle(null)
-    val summaryUiState by viewModel.summaryUiState.collectAsStateWithLifecycle()
 
     SummaryScreenContent(
-        summaryScreenState = summaryUiState,
-        errorMessage = errorMessage,
+        summaryScreenStateFlow = viewModel.summaryUiState,
+        errorMessageFlow = viewModel.event,
         onNavigationItemSelected = onNavigationItemSelected,
         modifier = modifier
     )
@@ -56,20 +58,21 @@ fun SummaryScreen(
 
 @Composable
 fun SummaryScreenContent(
-    summaryScreenState: SummaryScreenState,
-    errorMessage: String?,
+    summaryScreenStateFlow: StateFlow<SummaryScreenState>,
+    errorMessageFlow: Flow<String>,
     onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
+    val summaryUiState by summaryScreenStateFlow.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
 
-    LaunchedEffect(errorMessage) {
-        if (!errorMessage.isNullOrBlank()) {
+    ObserveAsEvents(errorMessageFlow) { event ->
+        if (event.isNotBlank()) {
             snackbarHostState.showSnackbar(
-                message = errorMessage,
+                message = event,
                 actionLabel = okText,
                 duration = SnackbarDuration.Indefinite,
             )
@@ -105,7 +108,7 @@ fun SummaryScreenContent(
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
-                if (summaryScreenState.isLoading) {
+                if (summaryUiState.isLoading) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -118,8 +121,8 @@ fun SummaryScreenContent(
                         )
                     }
                 } else {
-                    if (summaryScreenState.summaryState is SummaryState.Loaded) {
-                        val state = summaryScreenState.summaryState.value
+                    if (summaryUiState.summaryState is SummaryState.Loaded) {
+                        val state = (summaryUiState.summaryState as SummaryState.Loaded).value
                         Text(
                             text = state.amountOfDaysAppUsing.trimText(context, R.string.member_for_days),
                             modifier = Modifier.fillMaxWidth()
@@ -166,12 +169,14 @@ private fun String.trimText(context: Context, @StringRes resource: Int): String 
 private fun SummaryScreenDefaultPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenState = SummaryScreenState(
-                summaryState = SummaryState.Default(),
-                isLoading = false
+            summaryScreenStateFlow = MutableStateFlow(
+                SummaryScreenState(
+                    summaryState = SummaryState.Default(),
+                    isLoading = false
+                )
             ),
             onNavigationItemSelected = {},
-            errorMessage = null
+            errorMessageFlow = flowOf()
         )
     }
 }
@@ -181,12 +186,14 @@ private fun SummaryScreenDefaultPreview() {
 private fun SummaryScreenLoadingPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenState = SummaryScreenState(
-                summaryState = SummaryState.Default(),
-                isLoading = true
+            summaryScreenStateFlow = MutableStateFlow(
+                SummaryScreenState(
+                    summaryState = SummaryState.Default(),
+                    isLoading = true
+                )
             ),
             onNavigationItemSelected = {},
-            errorMessage = null
+            errorMessageFlow = flowOf()
         )
     }
 }
@@ -196,20 +203,22 @@ private fun SummaryScreenLoadingPreview() {
 private fun SummaryScreenLoadedPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenState = SummaryScreenState(
-                summaryState = SummaryState.Loaded( // for testing
-                    SummaryUi(
-                        totalItemsCount = "15",
-                        hiddenCoinsCount = "3",
-                        totalNotesCount = "4",
-                        dayWithMostNotes = "21.09.021",
-                        amountOfDaysAppUsing = "34"
-                    )
-                ),
-                isLoading = false
+            summaryScreenStateFlow = MutableStateFlow(
+                SummaryScreenState(
+                    summaryState = SummaryState.Loaded(
+                        SummaryUi(
+                            totalItemsCount = "15",
+                            hiddenCoinsCount = "3",
+                            totalNotesCount = "4",
+                            dayWithMostNotes = "21.09.021",
+                            amountOfDaysAppUsing = "34"
+                        )
+                    ),
+                    isLoading = false
+                )
             ),
             onNavigationItemSelected = {},
-            errorMessage = null
+            errorMessageFlow = flowOf()
         )
     }
 }
