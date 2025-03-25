@@ -34,10 +34,6 @@ import com.example.coinscomp.presentation.uiviews.CustomSnackbar
 import com.example.coinscomp.presentation.uiviews.ObserveAsEvents
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 
 private const val SUMMARY_NAV_ITEM_INDEX = 1
 
@@ -48,28 +44,11 @@ fun SummaryScreen(
 ) {
     val viewModel: SummaryScreenViewModel = hiltViewModel()
 
-    SummaryScreenContent(
-        summaryScreenStateFlow = viewModel.summaryUiState,
-        errorMessageFlow = viewModel.event,
-        onNavigationItemSelected = onNavigationItemSelected,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun SummaryScreenContent(
-    summaryScreenStateFlow: StateFlow<SummaryScreenState>,
-    errorMessageFlow: Flow<String>,
-    onNavigationItemSelected: (NavigationItems) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    val summaryUiState by summaryScreenStateFlow.collectAsStateWithLifecycle()
+    val summaryUiState by viewModel.summaryUiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
 
-    ObserveAsEvents(errorMessageFlow) { event ->
+    ObserveAsEvents(viewModel.event) { event ->
         if (event.isNotBlank()) {
             snackbarHostState.showSnackbar(
                 message = event,
@@ -78,6 +57,23 @@ fun SummaryScreenContent(
             )
         }
     }
+
+    SummaryScreenContent(
+        summaryUiState = summaryUiState,
+        snackbarHostState = snackbarHostState,
+        onNavigationItemSelected = onNavigationItemSelected,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SummaryScreenContent(
+    summaryUiState: SummaryScreenState,
+    snackbarHostState: SnackbarHostState,
+    onNavigationItemSelected: (NavigationItems) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
 
     Scaffold(
         snackbarHost = {
@@ -122,7 +118,7 @@ fun SummaryScreenContent(
                     }
                 } else {
                     if (summaryUiState.summaryState is SummaryState.Loaded) {
-                        val state = (summaryUiState.summaryState as SummaryState.Loaded).value
+                        val state = summaryUiState.summaryState.value
                         Text(
                             text = state.amountOfDaysAppUsing.trimText(context, R.string.member_for_days),
                             modifier = Modifier.fillMaxWidth()
@@ -169,14 +165,12 @@ private fun String.trimText(context: Context, @StringRes resource: Int): String 
 private fun SummaryScreenDefaultPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenStateFlow = MutableStateFlow(
-                SummaryScreenState(
-                    summaryState = SummaryState.Default(),
-                    isLoading = false
-                )
+            summaryUiState = SummaryScreenState(
+                summaryState = SummaryState.Default(),
+                isLoading = false
             ),
+            snackbarHostState = SnackbarHostState(),
             onNavigationItemSelected = {},
-            errorMessageFlow = flowOf()
         )
     }
 }
@@ -186,14 +180,12 @@ private fun SummaryScreenDefaultPreview() {
 private fun SummaryScreenLoadingPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenStateFlow = MutableStateFlow(
-                SummaryScreenState(
-                    summaryState = SummaryState.Default(),
-                    isLoading = true
-                )
+            summaryUiState = SummaryScreenState(
+                summaryState = SummaryState.Default(),
+                isLoading = true
             ),
-            onNavigationItemSelected = {},
-            errorMessageFlow = flowOf()
+            snackbarHostState = SnackbarHostState(),
+            onNavigationItemSelected = {}
         )
     }
 }
@@ -203,22 +195,20 @@ private fun SummaryScreenLoadingPreview() {
 private fun SummaryScreenLoadedPreview() {
     CoinsCompTheme {
         SummaryScreenContent(
-            summaryScreenStateFlow = MutableStateFlow(
-                SummaryScreenState(
-                    summaryState = SummaryState.Loaded(
-                        SummaryUi(
-                            totalItemsCount = "15",
-                            hiddenCoinsCount = "3",
-                            totalNotesCount = "4",
-                            dayWithMostNotes = "21.09.021",
-                            amountOfDaysAppUsing = "34"
-                        )
-                    ),
-                    isLoading = false
-                )
+            summaryUiState = SummaryScreenState(
+                summaryState = SummaryState.Loaded(
+                    SummaryUi(
+                        totalItemsCount = "15",
+                        hiddenCoinsCount = "3",
+                        totalNotesCount = "4",
+                        dayWithMostNotes = "21.09.021",
+                        amountOfDaysAppUsing = "34"
+                    )
+                ),
+                isLoading = false
             ),
-            onNavigationItemSelected = {},
-            errorMessageFlow = flowOf()
+            snackbarHostState = SnackbarHostState(),
+            onNavigationItemSelected = {}
         )
     }
 }

@@ -53,10 +53,6 @@ import com.example.coinscomp.presentation.uiviews.widgets.CustomCoin
 import com.example.coinscomp.presentation.uiviews.widgets.CustomNote
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.ui.theme.CoinsCompTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 
 private const val HOME_NAV_ITEM_INDEX = 0
 
@@ -66,34 +62,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val viewModel: HomeScreenViewModel = hiltViewModel()
-
-    HomeScreenContent(
-        itemsListFlow = viewModel.itemsList,
-        loadingFlow = viewModel.isLoading,
-        event = viewModel.event,
-        onCoinClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinClick(coin)) },
-        onCoinLongClicked = { coin -> viewModel.handleIntent(HomeIntent.CoinLongClick(coin)) },
-        onNoteLongClicked = { note -> viewModel.handleIntent(HomeIntent.NoteLongClick(note)) },
-        onAddNote = { noteText -> viewModel.handleIntent(HomeIntent.AddNote(noteText)) },
-        onNavigationItemSelected = onNavigationItemSelected,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun HomeScreenContent(
-    itemsListFlow: StateFlow<List<CustomViewListItems>>,
-    loadingFlow: StateFlow<Boolean>,
-    event: Flow<EventsCoins>,
-    onCoinClicked: (ModelCoinsCustomView) -> Unit,
-    onCoinLongClicked: (ModelCoinsCustomView) -> Unit,
-    onNoteLongClicked: (ModelNotesCustomView) -> Unit,
-    onAddNote: (String) -> Unit,
-    onNavigationItemSelected: (NavigationItems) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val itemsList by itemsListFlow.collectAsStateWithLifecycle()
-    val loading by loadingFlow.collectAsStateWithLifecycle()
+    val itemsList by viewModel.itemsList.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val okText = stringResource(android.R.string.ok)
@@ -104,7 +74,7 @@ private fun HomeScreenContent(
         derivedStateOf { listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.lastIndex }
     }
 
-    ObserveAsEvents(event) { event ->
+    ObserveAsEvents(viewModel.event) { event ->
         when (event) {
             is EventsCoins.MessageForUser -> {
                 val message = event.message
@@ -126,6 +96,27 @@ private fun HomeScreenContent(
         }
     }
 
+    HomeScreenContent(
+        itemsList = itemsList,
+        isLoading = isLoading,
+        snackbarHostState = snackbarHostState,
+        listState = listState,
+        handleIntent = viewModel::handleIntent,
+        onNavigationItemSelected = onNavigationItemSelected,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
+    itemsList: List<CustomViewListItems>,
+    isLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
+    listState: LazyListState,
+    handleIntent: (HomeIntent) -> Unit,
+    onNavigationItemSelected: (NavigationItems) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -149,7 +140,7 @@ private fun HomeScreenContent(
                 val openHideCoinDialog = remember { mutableStateOf<ModelCoinsCustomView?>(null) }
 
                 if (itemsList.isEmpty()) {
-                    if (!loading) {
+                    if (!isLoading) {
                         Text(
                             text = stringResource(R.string.no_data),
                             modifier = Modifier.align(Alignment.Center)
@@ -159,13 +150,13 @@ private fun HomeScreenContent(
                     ItemList(
                         itemsList = itemsList,
                         listState = listState,
-                        onCoinClick = { model -> onCoinClicked(model) },
+                        onCoinClick = { model -> handleIntent(HomeIntent.CoinClick(model)) },
                         onCoinLongClick = { openHideCoinDialog.value = it },
                         onNoteLongClick = { openDeleteNoteDialog.value = it }
                     )
                 }
 
-                if (loading) {
+                if (isLoading) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.secondary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -191,7 +182,7 @@ private fun HomeScreenContent(
                     onDismiss = { openAddNoteDialog = false },
                     onConfirmation = { enteredText ->
                         openAddNoteDialog = false
-                        onAddNote(enteredText)
+                        handleIntent(HomeIntent.AddNote(enteredText))
                     }
                 )
 
@@ -199,7 +190,7 @@ private fun HomeScreenContent(
                     openDialog = openDeleteNoteDialog.value != null,
                     onDismiss = { openDeleteNoteDialog.value = null },
                     onConfirmation = {
-                        onNoteLongClicked(openDeleteNoteDialog.value!!)
+                        handleIntent(HomeIntent.NoteLongClick(openDeleteNoteDialog.value!!))
                         openDeleteNoteDialog.value = null
                     }
                 )
@@ -208,7 +199,7 @@ private fun HomeScreenContent(
                     openDialog = openHideCoinDialog.value != null,
                     onDismiss = { openHideCoinDialog.value = null },
                     onConfirmation = {
-                        onCoinLongClicked(openHideCoinDialog.value!!)
+                        handleIntent(HomeIntent.CoinLongClick(openHideCoinDialog.value!!))
                         openHideCoinDialog.value = null
                     }
                 )
@@ -307,15 +298,12 @@ private fun HomeScreenPreview() {
         }
         val sampleItems = notesList.plus(coinsList)
         HomeScreenContent(
-            itemsListFlow = MutableStateFlow(sampleItems),
-            loadingFlow = MutableStateFlow(false),
-            event = flowOf(),
-            onCoinClicked = {},
-            onCoinLongClicked = {},
-            onNoteLongClicked = {},
-            onAddNote = {},
+            itemsList = sampleItems,
+            isLoading = false,
+            listState = rememberLazyListState(),
+            handleIntent = {},
             onNavigationItemSelected = {},
-            modifier = Modifier
+            snackbarHostState = SnackbarHostState()
         )
     }
 }
