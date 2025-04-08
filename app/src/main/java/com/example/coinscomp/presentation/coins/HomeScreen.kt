@@ -1,7 +1,12 @@
 package com.example.coinscomp.presentation.coins
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,11 +34,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -119,6 +126,27 @@ private fun HomeScreenContent(
     modifier: Modifier = Modifier
 ) {
     var openAddNoteDialog by remember { mutableStateOf(false) }
+    val showBottomBar = remember { mutableStateOf(true) }
+
+    LaunchedEffect(listState) {
+        var previousIndex = listState.firstVisibleItemIndex
+        var previousOffset = listState.firstVisibleItemScrollOffset
+
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                val scrollingUp = when {
+                    index < previousIndex -> true
+                    index == previousIndex && offset < previousOffset -> true
+                    else -> false
+                }
+
+                showBottomBar.value = scrollingUp || (index == 0 && offset == 0)
+
+                previousIndex = index
+                previousOffset = offset
+            }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -136,10 +164,16 @@ private fun HomeScreenContent(
             },
             floatingActionButtonPosition = FabPosition.End,
             bottomBar = {
-                BottomNavigationBar(
-                    HOME_NAV_ITEM_INDEX,
-                    onItemSelected = { item -> onNavigationItemSelected(item) }
-                )
+                AnimatedVisibility( // change visibility at scrolling
+                    visible = showBottomBar.value,
+                    enter = fadeIn() + slideInVertically { it },
+                    exit = fadeOut() + slideOutVertically { it }
+                ) {
+                    BottomNavigationBar(
+                        HOME_NAV_ITEM_INDEX,
+                        onItemSelected = { item -> onNavigationItemSelected(item) }
+                    )
+                }
             }
         ) { innerPadding ->
             Column(
