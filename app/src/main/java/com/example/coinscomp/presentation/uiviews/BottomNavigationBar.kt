@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.coinscomp.presentation.utils.NavigationItems
 import com.example.coinscomp.presentation.utils.bottomNavigationItemsList
 
@@ -45,4 +46,13 @@ fun BottomNavigationBar(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BottomNavigationBarPreview() {
+    BottomNavigationBar(
+        selectedIndex = 0,
+        onItemSelected = {}
+    )
 }

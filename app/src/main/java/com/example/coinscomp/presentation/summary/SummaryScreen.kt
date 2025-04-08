@@ -142,6 +142,7 @@ fun SummaryScreenContent(
                     }
                 }
             }
+            // located here (not in Scaffold slots) so that the snackbar would overlap it
             BottomNavigationBar(
                 selectedIndex = SUMMARY_NAV_ITEM_INDEX,
                 onItemSelected = { item ->

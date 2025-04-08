@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -117,58 +118,14 @@ private fun HomeScreenContent(
     onNavigationItemSelected: (NavigationItems) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { data -> CustomSnackbar(data) }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .padding(top = innerPadding.calculateTopPadding())
-                .fillMaxSize()
-        ) {
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                var openAddNoteDialog by remember { mutableStateOf(false) }
-                val openDeleteNoteDialog = remember { mutableStateOf<ModelNotesCustomView?>(null) }
-                val openHideCoinDialog = remember { mutableStateOf<ModelCoinsCustomView?>(null) }
-
-                if (itemsList.isEmpty()) {
-                    if (!isLoading) {
-                        Text(
-                            text = stringResource(R.string.no_data),
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                } else {
-                    ItemList(
-                        itemsList = itemsList,
-                        listState = listState,
-                        onCoinClick = { model -> handleIntent(HomeIntent.CoinClick(model)) },
-                        onCoinLongClick = { openHideCoinDialog.value = it },
-                        onNoteLongClick = { openDeleteNoteDialog.value = it }
-                    )
-                }
-
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
+    var openAddNoteDialog by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Scaffold(
+            floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { openAddNoteDialog = true },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 16.dp, end = 24.dp),
+                    onClick = { openAddNoteDialog = true }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -176,40 +133,90 @@ private fun HomeScreenContent(
                         modifier = Modifier.size(28.dp)
                     )
                 }
-
-                AddNoteAlertDialog(
-                    openDialog = openAddNoteDialog,
-                    onDismiss = { openAddNoteDialog = false },
-                    onConfirmation = { enteredText ->
-                        openAddNoteDialog = false
-                        handleIntent(HomeIntent.AddNote(enteredText))
-                    }
-                )
-
-                DeleteNoteAlertDialog(
-                    openDialog = openDeleteNoteDialog.value != null,
-                    onDismiss = { openDeleteNoteDialog.value = null },
-                    onConfirmation = {
-                        handleIntent(HomeIntent.NoteLongClick(openDeleteNoteDialog.value!!))
-                        openDeleteNoteDialog.value = null
-                    }
-                )
-
-                HideCoinAlertDialog(
-                    openDialog = openHideCoinDialog.value != null,
-                    onDismiss = { openHideCoinDialog.value = null },
-                    onConfirmation = {
-                        handleIntent(HomeIntent.CoinLongClick(openHideCoinDialog.value!!))
-                        openHideCoinDialog.value = null
-                    }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            bottomBar = {
+                BottomNavigationBar(
+                    HOME_NAV_ITEM_INDEX,
+                    onItemSelected = { item -> onNavigationItemSelected(item) }
                 )
             }
+        ) { innerPadding ->
+            Column(
+                modifier = modifier
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .fillMaxSize()
+            ) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    val openDeleteNoteDialog = remember { mutableStateOf<ModelNotesCustomView?>(null) }
+                    val openHideCoinDialog = remember { mutableStateOf<ModelCoinsCustomView?>(null) }
 
-            BottomNavigationBar(
-                HOME_NAV_ITEM_INDEX,
-                onItemSelected = { item -> onNavigationItemSelected(item) }
-            )
+                    if (itemsList.isEmpty()) {
+                        if (!isLoading) {
+                            Text(
+                                text = stringResource(R.string.no_data),
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    } else {
+                        ItemList(
+                            itemsList = itemsList,
+                            listState = listState,
+                            onCoinClick = { model -> handleIntent(HomeIntent.CoinClick(model)) },
+                            onCoinLongClick = { openHideCoinDialog.value = it },
+                            onNoteLongClick = { openDeleteNoteDialog.value = it }
+                        )
+                    }
+
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+
+                    AddNoteAlertDialog(
+                        openDialog = openAddNoteDialog,
+                        onDismiss = { openAddNoteDialog = false },
+                        onConfirmation = { enteredText ->
+                            openAddNoteDialog = false
+                            handleIntent(HomeIntent.AddNote(enteredText))
+                        }
+                    )
+
+                    DeleteNoteAlertDialog(
+                        openDialog = openDeleteNoteDialog.value != null,
+                        onDismiss = { openDeleteNoteDialog.value = null },
+                        onConfirmation = {
+                            handleIntent(HomeIntent.NoteLongClick(openDeleteNoteDialog.value!!))
+                            openDeleteNoteDialog.value = null
+                        }
+                    )
+
+                    HideCoinAlertDialog(
+                        openDialog = openHideCoinDialog.value != null,
+                        onDismiss = { openHideCoinDialog.value = null },
+                        onConfirmation = {
+                            handleIntent(HomeIntent.CoinLongClick(openHideCoinDialog.value!!))
+                            openHideCoinDialog.value = null
+                        }
+                    )
+                }
+            }
         }
+        // located here (not in Scaffold slots) for overlapping bottom navigation and FAB
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp),
+            snackbar = { data -> CustomSnackbar(data) }
+        )
     }
 }
 
